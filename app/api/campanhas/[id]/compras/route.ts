@@ -44,15 +44,27 @@ export async function GET(
       .sort({ createdAt: -1 })
       .lean();
 
-    const itens = compras.map((c) => ({
-      id: (c as { _id: mongoose.Types.ObjectId })._id.toString(),
-      comprador: (c as { comprador: { nome: string; cpf: string; email: string; telefone?: string } }).comprador,
-      quantidade: (c as { quantidade: number }).quantidade,
-      numeros: (c as { numeros: string[] }).numeros,
-      valorTotal: (c as { valorTotal: number }).valorTotal,
-      status: (c as { status: string }).status,
-      createdAt: (c as { createdAt: Date }).createdAt,
-    }));
+    type CompraLean = {
+      _id: mongoose.Types.ObjectId;
+      comprador: { nome: string; cpf: string; email: string; telefone?: string };
+      quantidade: number;
+      numeros: string[];
+      valorTotal: number;
+      status: string;
+      createdAt: Date;
+    };
+    const itens = compras.map((c) => {
+      const doc = c as unknown as CompraLean;
+      return {
+        id: doc._id.toString(),
+        comprador: doc.comprador,
+        quantidade: doc.quantidade,
+        numeros: doc.numeros,
+        valorTotal: doc.valorTotal,
+        status: doc.status,
+        createdAt: doc.createdAt,
+      };
+    });
 
     return NextResponse.json({ compras: itens });
   } catch (error) {
