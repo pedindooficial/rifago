@@ -10,12 +10,12 @@ export async function GET() {
   }
   try {
     await connectDB();
-    let config = await AdminConfig.findOne().lean();
+    let config: { whatsappUrl?: string; registrationOpen?: boolean } | null = (await AdminConfig.findOne().lean()) as { whatsappUrl?: string; registrationOpen?: boolean } | null;
     if (!config) {
       await AdminConfig.create({ registrationOpen: false, whatsappUrl: "" });
       config = (await AdminConfig.findOne().lean()) as { whatsappUrl?: string; registrationOpen?: boolean } | null;
     }
-    const c = config as { whatsappUrl?: string; registrationOpen?: boolean };
+    const c = config;
     return NextResponse.json({
       whatsappUrl: c?.whatsappUrl ?? "",
       registrationOpen: c?.registrationOpen ?? false,
