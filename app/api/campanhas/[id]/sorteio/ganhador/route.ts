@@ -62,7 +62,7 @@ export async function GET(
       );
     }
 
-    const nome = (compra as { comprador: { nome: string } }).comprador?.nome ?? "";
+    const nome = (compra as unknown as { comprador: { nome: string } }).comprador?.nome ?? "";
     return NextResponse.json({ ganhador: nome });
   } catch (error) {
     console.error("Erro ao buscar ganhador:", error);
