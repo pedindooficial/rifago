@@ -56,14 +56,14 @@ export async function POST(
       );
     }
 
-    const doc = compra as {
+    const doc = compra as unknown as {
       status: string;
       pagamentoId?: string;
     };
 
     if (!forcar && doc.status === "paga" && doc.pagamentoId?.trim()) {
       const cfg = await PagamentoConfig.findOne({ userId: campanha.userId }).lean();
-      const cfgAny = cfg as {
+      const cfgAny = cfg as unknown as {
         mpModo?: "teste" | "producao";
         mpAccessToken?: string;
         mpAccessTokenTeste?: string;
