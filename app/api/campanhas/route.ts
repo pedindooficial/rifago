@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
 
     const campanhas = docs
       .map((d) => {
-        const base = docToCampanha(d as Parameters<typeof docToCampanha>[0]);
+        const base = docToCampanha(d as unknown as Parameters<typeof docToCampanha>[0]);
         if (!base) return null;
         const stats = statsPorCampanha[String(d._id)] ?? {
           titulosVendidos: 0,
@@ -120,7 +120,7 @@ export async function POST(req: NextRequest) {
       status: "rascunho",
     });
 
-    const campanha = docToCampanha(doc as Parameters<typeof docToCampanha>[0]);
+    const campanha = docToCampanha(doc as unknown as Parameters<typeof docToCampanha>[0]);
     return NextResponse.json(campanha, { status: 201 });
   } catch (error) {
     console.error("Erro ao criar campanha:", error);
