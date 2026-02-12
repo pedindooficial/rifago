@@ -8,17 +8,16 @@ export async function GET() {
   try {
     await connectDB();
     const hasAdmin = (await Admin.countDocuments()) > 0;
-    let config = await AdminConfig.findOne().lean();
+    let config: { registrationOpen?: boolean } | null = (await AdminConfig.findOne().lean()) as { registrationOpen?: boolean } | null;
     if (!config) {
       await AdminConfig.create({ registrationOpen: true });
       config = (await AdminConfig.findOne().lean()) as { registrationOpen?: boolean } | null;
     }
-    const registrationOpen =
-      ((config as { registrationOpen?: boolean })?.registrationOpen ?? true) && !hasAdmin;
+    const registrationOpen = (config?.registrationOpen ?? true) && !hasAdmin;
     return NextResponse.json({
       registrationOpen: !!registrationOpen,
       hasAdmin,
-      canRegister: (config as { registrationOpen?: boolean })?.registrationOpen === true,
+      canRegister: config?.registrationOpen === true,
     });
   } catch (error) {
     console.error("Erro ao verificar registro admin:", error);
