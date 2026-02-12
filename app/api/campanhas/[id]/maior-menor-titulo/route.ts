@@ -48,14 +48,14 @@ export async function GET(
 
     const todosNumeros: string[] = [];
     for (const c of compras) {
-      const nums = (c as { numeros?: string[] }).numeros ?? [];
+      const nums = (c as unknown as { numeros?: string[] }).numeros ?? [];
       for (const n of nums) {
         const s = String(n).trim();
         if (s) todosNumeros.push(s);
       }
     }
 
-    const quantidadeTitulos = (campanha as { quantidadeTitulos: number }).quantidadeTitulos;
+    const quantidadeTitulos = (campanha as unknown as { quantidadeTitulos: number }).quantidadeTitulos;
     let menorTitulo: string | null = null;
     let maiorTitulo: string | null = null;
 
