@@ -54,9 +54,9 @@ export async function GET(
         { status: 404 }
       );
     }
-    const campanha = docToCampanha(doc as Parameters<typeof docToCampanha>[0]);
+    const campanha = docToCampanha(doc as unknown as Parameters<typeof docToCampanha>[0]);
     const stats = await getStatsCampanha(id);
-    const docWithUserId = doc as { userId?: unknown };
+    const docWithUserId = doc as unknown as { userId?: unknown };
     let redesSociais: Record<string, string> = {};
     if (docWithUserId.userId) {
       const redes = await RedesSociaisConfig.findOne({ userId: docWithUserId.userId }).lean();

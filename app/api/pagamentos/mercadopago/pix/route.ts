@@ -75,8 +75,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const cfg = await PagamentoConfig.findOne({ userId: doc.userId }).lean();
-    const cfgAny = cfg as {
+    const cfg = await PagamentoConfig.findOne({ userId: (doc as unknown as { userId?: unknown }).userId }).lean();
+    const cfgAny = cfg as unknown as {
       mpModo?: "teste" | "producao";
       mpAccessToken?: string;
       mpAccessTokenTeste?: string;
@@ -189,7 +189,7 @@ export async function POST(request: NextRequest) {
     }
 
     const paymentId = String((json as { id?: number }).id);
-    const totalTitulos = (doc as { quantidadeTitulos: number }).quantidadeTitulos;
+    const totalTitulos = (doc as unknown as { quantidadeTitulos: number }).quantidadeTitulos;
     if (quantidade > totalTitulos) {
       return NextResponse.json(
         { error: `Quantidade maior que o total de títulos (${totalTitulos})` },
@@ -205,7 +205,7 @@ export async function POST(request: NextRequest) {
       .lean();
     const numerosVendidos = new Set<string>();
     for (const c of comprasExistentes) {
-      const nums = (c as { numeros?: string[] }).numeros ?? [];
+      const nums = (c as unknown as { numeros?: string[] }).numeros ?? [];
       for (const n of nums) numerosVendidos.add(numeroSemZero(n));
     }
     const disponiveis = numerosDisponiveis(totalTitulos, numerosVendidos);
@@ -217,7 +217,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    const modoTitulos = (doc as { modoTitulos?: "aleatorios" | "expostos" }).modoTitulos ?? "aleatorios";
+    const modoTitulos = (doc as unknown as { modoTitulos?: "aleatorios" | "expostos" }).modoTitulos ?? "aleatorios";
     const numerosAtribuidos =
       modoTitulos === "aleatorios"
         ? shuffle(disponiveis).slice(0, quantidade)

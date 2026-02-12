@@ -7,7 +7,7 @@ export async function GET() {
   try {
     await connectDB();
     const config = await AdminConfig.findOne().select("whatsappUrl").lean();
-    const url = (config as { whatsappUrl?: string } | null)?.whatsappUrl ?? "";
+    const url = (config as unknown as { whatsappUrl?: string } | null)?.whatsappUrl ?? "";
     return NextResponse.json({ whatsappUrl: url });
   } catch (error) {
     console.error("Erro ao obter config suporte:", error);

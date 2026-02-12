@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     if (!ok) {
       return NextResponse.json({ error: "Credenciais inválidas." }, { status: 401 });
     }
-    const a = admin as { _id: { toString: () => string } };
+    const a = admin as unknown as { _id: { toString: () => string } };
     const token = await createAdminSession(a._id.toString());
     const opts = getAdminCookieOpts();
     const res = NextResponse.json({ ok: true });

@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
       .sort({ createdAt: 1 })
       .lean();
     const list = messages.map((m) => {
-      const doc = m as { sender: string; content: string; createdAt: Date };
+      const doc = m as unknown as { sender: string; content: string; createdAt: Date };
       return {
         sender: doc.sender,
         content: doc.content,

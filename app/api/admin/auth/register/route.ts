@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
       email: email.trim().toLowerCase(),
       password,
     });
-    const adminId = (created as { _id: { toString: () => string } })._id.toString();
+    const adminId = (created as unknown as { _id: { toString: () => string } })._id.toString();
 
     if (!hasAdmin) {
       await AdminConfig.findOneAndUpdate({}, { $set: { registrationOpen: false } }, { upsert: true });

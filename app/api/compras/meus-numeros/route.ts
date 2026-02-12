@@ -32,14 +32,14 @@ export async function POST(request: NextRequest) {
 
     const campanhaIds = [
       ...new Set(
-        comprasDoc.map((c) => (c as { campanhaId: mongoose.Types.ObjectId }).campanhaId.toString())
+        comprasDoc.map((c) => (c as unknown as { campanhaId: mongoose.Types.ObjectId }).campanhaId.toString())
       ),
     ];
     const campanhas = await Campanha.find({ _id: { $in: campanhaIds.map((id) => new mongoose.Types.ObjectId(id)) } })
       .select("nome")
       .lean();
     const nomesPorId = Object.fromEntries(
-      campanhas.map((c) => [(c as { _id: mongoose.Types.ObjectId })._id.toString(), (c as { nome: string }).nome])
+      campanhas.map((c) => [(c as unknown as { _id: mongoose.Types.ObjectId })._id.toString(), (c as unknown as { nome: string }).nome])
     );
 
     const porCampanha = new Map<
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
       { campanhaNome: string; numeros: string[]; valorTotal: number; quantidadeTotal: number }
     >();
     for (const c of comprasDoc) {
-      const doc = c as {
+      const doc = c as unknown as {
         campanhaId: mongoose.Types.ObjectId;
         numeros: string[];
         valorTotal?: number;

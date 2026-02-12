@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  const c = cfg as {
+  const c = cfg as unknown as {
     mpModo?: string;
     mpPublicKey?: string;
     mpAccessToken?: string;

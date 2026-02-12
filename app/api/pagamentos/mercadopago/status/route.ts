@@ -18,11 +18,11 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Sessão expirada" }, { status: 404 });
     }
 
-    const s = session as { pagamentoId: string; userId: unknown };
+    const s = session as unknown as { pagamentoId: string; userId: unknown };
     const cfg = await PagamentoConfig.findOne({ userId: s.userId })
       .select("mpModo mpAccessToken mpAccessTokenTeste mpAccessTokenProducao")
       .lean();
-    const cfgAny = cfg as {
+    const cfgAny = cfg as unknown as {
       mpModo?: "teste" | "producao";
       mpAccessToken?: string;
       mpAccessTokenTeste?: string;

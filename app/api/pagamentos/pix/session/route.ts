@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Sessão expirada ou não encontrada" }, { status: 404 });
     }
 
-    const s = session as {
+    const s = session as unknown as {
       _id: unknown;
       pagamentoId: string;
       qrCode: string;

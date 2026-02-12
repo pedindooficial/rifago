@@ -26,7 +26,7 @@ export async function GET(
       return NextResponse.json({ error: "Campanha não encontrada ou não está ativa" }, { status: 404 });
     }
 
-    const doc = campanha as { rankingVisivel?: boolean };
+    const doc = campanha as unknown as { rankingVisivel?: boolean };
     if (!doc.rankingVisivel) {
       return NextResponse.json({ ranking: [] }, { status: 200 });
     }
@@ -42,7 +42,7 @@ export async function GET(
     >();
 
     for (const c of compras) {
-      const comp = c as {
+      const comp = c as unknown as {
         comprador: { nome: string; email: string; cpf: string };
         valorTotal: number;
         numeros: string[];

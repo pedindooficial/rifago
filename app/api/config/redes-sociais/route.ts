@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  const c = cfg as {
+  const c = cfg as unknown as {
     facebook?: string;
     instagram?: string;
     twitter?: string;
