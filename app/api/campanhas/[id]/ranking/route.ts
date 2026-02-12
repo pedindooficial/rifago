@@ -48,7 +48,7 @@ export async function GET(
     >();
 
     for (const c of compras) {
-      const comp = c as {
+      const comp = c as unknown as {
         comprador: { nome: string; email: string; cpf: string };
         valorTotal: number;
         numeros: string[];
