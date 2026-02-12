@@ -17,12 +17,12 @@ export async function POST(request: NextRequest) {
     }
     await connectDB();
 
-    let config = await AdminConfig.findOne().lean();
+    let config: { registrationOpen?: boolean } | null = (await AdminConfig.findOne().lean()) as { registrationOpen?: boolean } | null;
     if (!config) {
       await AdminConfig.create({ registrationOpen: true });
-      config = (await AdminConfig.findOne().lean()) as { registrationOpen: boolean } | null;
+      config = (await AdminConfig.findOne().lean()) as { registrationOpen?: boolean } | null;
     }
-    const regOpen = (config as { registrationOpen?: boolean })?.registrationOpen ?? true;
+    const regOpen = config?.registrationOpen ?? true;
     const hasAdmin = (await Admin.countDocuments()) > 0;
     if (!regOpen && hasAdmin) {
       return NextResponse.json(
