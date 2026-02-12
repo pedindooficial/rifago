@@ -16,7 +16,11 @@ export async function POST(request: NextRequest) {
     if (!admin) {
       return NextResponse.json({ error: "Credenciais inválidas." }, { status: 401 });
     }
-    const ok = await bcrypt.compare(password, (admin as { password: string }).password);
+    const adminPassword = (admin as unknown as { password?: string }).password;
+    if (typeof adminPassword !== "string") {
+      return NextResponse.json({ error: "Credenciais inválidas." }, { status: 401 });
+    }
+    const ok = await bcrypt.compare(password, adminPassword);
     if (!ok) {
       return NextResponse.json({ error: "Credenciais inválidas." }, { status: 401 });
     }
