@@ -10,7 +10,7 @@ async function getCampanhaDoUsuario(id: string, userId: string) {
   if (!mongoose.Types.ObjectId.isValid(id)) return null;
   await connectDB();
   const doc = await Campanha.findOne({ _id: id, userId }).lean();
-  return docToCampanha(doc as Parameters<typeof docToCampanha>[0]);
+  return docToCampanha(doc as unknown as Parameters<typeof docToCampanha>[0]);
 }
 
 /** Retorna totais de títulos vendidos, pendentes e valor arrecadado. */
@@ -135,7 +135,7 @@ export async function PUT(
         { status: 404 }
       );
     }
-    const campanha = docToCampanha(doc as Parameters<typeof docToCampanha>[0]);
+    const campanha = docToCampanha(doc as unknown as Parameters<typeof docToCampanha>[0]);
     return NextResponse.json(campanha);
   } catch (error) {
     console.error("Erro ao atualizar campanha:", error);
