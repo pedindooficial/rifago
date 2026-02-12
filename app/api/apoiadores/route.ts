@@ -40,9 +40,9 @@ export async function GET(request: NextRequest) {
     const campanhas = await Campanha.find({ userId: token.id })
       .select("_id nome")
       .lean();
-    const campanhaIds = campanhas.map((c) => (c as { _id: mongoose.Types.ObjectId })._id);
+    const campanhaIds = campanhas.map((c) => (c as unknown as { _id: mongoose.Types.ObjectId })._id);
     const nomesPorId = Object.fromEntries(
-      campanhas.map((c) => [(c as { _id: mongoose.Types.ObjectId })._id.toString(), (c as { nome: string }).nome])
+      campanhas.map((c) => [(c as unknown as { _id: mongoose.Types.ObjectId })._id.toString(), (c as unknown as { nome: string }).nome])
     );
 
     if (campanhaIds.length === 0) {
@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
     >();
 
     for (const c of compras) {
-      const doc = c as {
+      const doc = c as unknown as {
         comprador: { nome: string; cpf: string; email: string; telefone?: string };
         campanhaId: mongoose.Types.ObjectId;
         numeros: string[];
