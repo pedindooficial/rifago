@@ -15,7 +15,7 @@ export async function GET() {
       .sort({ createdAt: -1 })
       .lean();
     const list = users.map((u) => {
-      const doc = u as { _id: { toString: () => string }; email: string; name: string; createdAt: Date; twoFactorEnabled?: boolean };
+      const doc = u as unknown as { _id: { toString: () => string }; email: string; name: string; createdAt: Date; twoFactorEnabled?: boolean };
       return {
         id: doc._id.toString(),
         email: doc.email,
