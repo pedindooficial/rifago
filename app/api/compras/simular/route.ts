@@ -67,10 +67,11 @@ export async function POST(request: NextRequest) {
 
     await connectDB();
 
-    const campanha = await Campanha.findOne({
+    const campanhaRaw = await Campanha.findOne({
       _id: campanhaId,
       status: "ativa",
     }).lean();
+    const campanha = campanhaRaw as { valorPorTitulo?: number; userId?: unknown; quantidadeTitulos?: number } | null;
     if (!campanha || typeof campanha.valorPorTitulo !== "number") {
       return NextResponse.json(
         { error: "Campanha não encontrada ou não está ativa" },
