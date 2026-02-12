@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "E-mail ou senha incorretos" }, { status: 401 });
     }
 
-    const u = user as { _id: unknown; email: string; name: string; password: string; twoFactorEnabled?: boolean };
+    const u = user as unknown as { _id: unknown; email: string; name: string; password: string; twoFactorEnabled?: boolean };
     const passwordOk = await bcrypt.compare(password, u.password);
     if (!passwordOk) {
       return NextResponse.json({ error: "E-mail ou senha incorretos" }, { status: 401 });

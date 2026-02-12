@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ enabled: false });
     }
 
-    const u = user as { twoFactorEnabled?: boolean };
+    const u = user as unknown as { twoFactorEnabled?: boolean };
     return NextResponse.json({ enabled: !!u.twoFactorEnabled });
   } catch (error) {
     console.error("Erro ao verificar status 2FA:", error);

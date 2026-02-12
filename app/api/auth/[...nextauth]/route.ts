@@ -51,10 +51,10 @@ const handler = NextAuth({
         if (!credentials.password) return null;
         const user = await User.findOne({ email }).select("+password twoFactorEnabled").lean();
         if (!user) return null;
-        const ok = await bcrypt.compare(credentials.password, (user as { password: string }).password);
+        const ok = await bcrypt.compare(credentials.password, (user as unknown as { password: string }).password);
         if (!ok) return null;
 
-        const u = user as { _id: { toString: () => string }; email: string; name: string; twoFactorEnabled?: boolean };
+        const u = user as unknown as { _id: { toString: () => string }; email: string; name: string; twoFactorEnabled?: boolean };
         if (u.twoFactorEnabled) {
           return null;
         }

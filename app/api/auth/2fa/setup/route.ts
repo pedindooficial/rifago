@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Usuário não encontrado" }, { status: 404 });
     }
 
-    const u = user as { _id: unknown; email: string; twoFactorEnabled?: boolean };
+    const u = user as unknown as { _id: unknown; email: string; twoFactorEnabled?: boolean };
     if (u.twoFactorEnabled) {
       return NextResponse.json({ error: "2FA já está ativo. Desative primeiro para reconfigurar." }, { status: 400 });
     }

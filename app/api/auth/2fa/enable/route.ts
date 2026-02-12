@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Usuário não encontrado" }, { status: 404 });
     }
 
-    const u = user as { twoFactorSecret?: string };
+    const u = user as unknown as { twoFactorSecret?: string };
     if (!u.twoFactorSecret) {
       return NextResponse.json({ error: "Execute o passo de configuração (QR Code) primeiro." }, { status: 400 });
     }

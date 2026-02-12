@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Usuário não encontrado" }, { status: 404 });
     }
 
-    const u = user as { password: string; twoFactorSecret?: string };
+    const u = user as unknown as { password: string; twoFactorSecret?: string };
     const passwordOk = await bcrypt.compare(password, u.password);
     if (!passwordOk) {
       return NextResponse.json({ error: "Senha incorreta" }, { status: 400 });
