@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
         .sort({ createdAt: 1 })
         .lean();
       const list = messages.map((m) => {
-        const doc = m as { sender: string; content: string; createdAt: Date };
+        const doc = m as unknown as { sender: string; content: string; createdAt: Date };
         return {
           sender: doc.sender,
           content: doc.content,
@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
       .lean();
     const userMap = Object.fromEntries(
       users.map((u) => {
-        const d = u as { _id: mongoose.Types.ObjectId; email: string; name: string };
+        const d = u as unknown as { _id: mongoose.Types.ObjectId; email: string; name: string };
         return [d._id.toString(), { email: d.email, name: d.name }];
       })
     );
@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
         userId: sid,
         email: u?.email ?? "",
         name: u?.name ?? "",
-        lastAt: last ? ((last as { createdAt: Date }).createdAt instanceof Date ? (last as { createdAt: Date }).createdAt.toISOString() : String((last as { createdAt: unknown }).createdAt)) : undefined,
+        lastAt: last ? ((last as unknown as { createdAt: Date }).createdAt instanceof Date ? (last as unknown as { createdAt: Date }).createdAt.toISOString() : String((last as unknown as { createdAt: unknown }).createdAt)) : undefined,
       });
     }
     threads.sort((a, b) => (b.lastAt ?? "").localeCompare(a.lastAt ?? ""));
