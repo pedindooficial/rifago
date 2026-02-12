@@ -27,7 +27,7 @@ export async function GET(
     if (!user) {
       return NextResponse.json({ error: "Usuário não encontrado." }, { status: 404 });
     }
-    const u = user as {
+    const u = user as unknown as {
       _id: mongoose.Types.ObjectId;
       email: string;
       name: string;
@@ -40,10 +40,10 @@ export async function GET(
       .sort({ createdAt: -1 })
       .lean();
 
-    const campanhaIds = campanhas.map((c) => (c as { _id: mongoose.Types.ObjectId })._id);
+    const campanhaIds = campanhas.map((c) => (c as unknown as { _id: mongoose.Types.ObjectId })._id);
     const nomesPorId: Record<string, string> = {};
     campanhas.forEach((c) => {
-      const doc = c as { _id: mongoose.Types.ObjectId; nome: string };
+      const doc = c as unknown as { _id: mongoose.Types.ObjectId; nome: string };
       nomesPorId[doc._id.toString()] = doc.nome;
     });
 
@@ -54,7 +54,7 @@ export async function GET(
       .lean();
 
     const campanhasList = campanhas.map((c) => {
-      const doc = c as {
+      const doc = c as unknown as {
         _id: mongoose.Types.ObjectId;
         nome: string;
         status: string;
@@ -75,7 +75,7 @@ export async function GET(
     });
 
     const comprasList = compras.map((c) => {
-      const doc = c as {
+      const doc = c as unknown as {
         _id: mongoose.Types.ObjectId;
         campanhaId: mongoose.Types.ObjectId;
         comprador: { nome: string; cpf: string; email: string; telefone?: string };
