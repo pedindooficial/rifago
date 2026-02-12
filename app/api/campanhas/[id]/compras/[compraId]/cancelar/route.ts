@@ -62,7 +62,7 @@ export async function POST(
     };
 
     if (!forcar && doc.status === "paga" && doc.pagamentoId?.trim()) {
-      const cfg = await PagamentoConfig.findOne({ userId: campanha.userId }).lean();
+      const cfg = await PagamentoConfig.findOne({ userId: token.id }).lean();
       const cfgAny = cfg as unknown as {
         mpModo?: "teste" | "producao";
         mpAccessToken?: string;
