@@ -29,11 +29,11 @@ const handler = NextAuth({
           }).lean();
           if (!tokenDoc) return null;
 
-          const doc = tokenDoc as { userId: unknown };
+          const doc = tokenDoc as unknown as { userId: unknown };
           const user = await User.findById(doc.userId).select("+twoFactorSecret email name").lean();
           if (!user) return null;
 
-          const u = user as { _id: { toString: () => string }; twoFactorSecret?: string; email: string; name: string };
+          const u = user as unknown as { _id: { toString: () => string }; twoFactorSecret?: string; email: string; name: string };
           if (!u.twoFactorSecret) return null;
 
           const valid = await totpVerify(u.twoFactorSecret, credentials.twoFactorCode.replace(/\D/g, ""));
