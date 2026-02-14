@@ -16,10 +16,10 @@ export async function getAdminFromRequest(): Promise<{ id: string; email: string
     expiresAt: { $gt: new Date() },
   }).lean();
   if (!session) return null;
-  const doc = session as { adminId: { toString: () => string } };
+  const doc = session as unknown as { adminId: { toString: () => string } };
   const admin = await Admin.findById(doc.adminId).select("email").lean();
   if (!admin) return null;
-  const a = admin as { _id: { toString: () => string }; email: string };
+  const a = admin as unknown as { _id: { toString: () => string }; email: string };
   return { id: a._id.toString(), email: a.email };
 }
 

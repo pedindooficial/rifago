@@ -71,15 +71,31 @@ export async function POST(request: NextRequest) {
       _id: campanhaId,
       status: "ativa",
     }).lean();
-    const campanha = campanhaRaw as { valorPorTitulo?: number; userId?: unknown; quantidadeTitulos?: number } | null;
+    type CampanhaLean = {
+      valorPorTitulo?: number;
+      userId?: unknown;
+      quantidadeTitulos?: number;
+      modoTitulos?: string;
+      promocao?: string;
+      nome?: string;
+    };
+    const campanha = campanhaRaw as CampanhaLean | null;
     if (!campanha || typeof campanha.valorPorTitulo !== "number") {
       return NextResponse.json(
         { error: "Campanha não encontrada ou não está ativa" },
         { status: 404 }
       );
     }
+    const totalTitulos = campanha.quantidadeTitulos ?? 0;
+    if (totalTitulos < 1) {
+      return NextResponse.json(
+        { error: "Campanha não encontrada ou não está ativa" },
+        { status: 404 }
+      );
+    }
 
-    const cfg = await PagamentoConfig.findOne({ userId: campanha.userId }).lean();
+    const cfgRaw = await PagamentoConfig.findOne({ userId: campanha.userId }).lean();
+    const cfg = cfgRaw as unknown as { mpModo?: "teste" | "producao" } | null;
     if (!cfg || cfg.mpModo !== "teste") {
       return NextResponse.json(
         {
@@ -90,7 +106,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const totalTitulos = campanha.quantidadeTitulos;
     if (quantidade > totalTitulos) {
       return NextResponse.json(
         { error: `Quantidade maior que o total de títulos (${totalTitulos})` },
@@ -120,13 +135,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const modoTitulos = campanha.modoTitulos ?? "aleatorios";
+    const modoTitulos = (campanha.modoTitulos ?? "aleatorios") as "aleatorios" | "expostos";
     const numerosAtribuidos =
       modoTitulos === "aleatorios"
         ? shuffle(disponiveis).slice(0, quantidade)
         : disponiveis.slice(0, quantidade);
 
-    const promocoes = parsePromocaoFromString(campanha.promocao);
+    const promocoes = parsePromocaoFromString(campanha.promocao ?? "");
     const valorTotal = valorTotalComPromocao(
       promocoes,
       quantidade,
@@ -151,7 +166,7 @@ export async function POST(request: NextRequest) {
       compraId: compra._id.toString(),
       numeros: numerosAtribuidos,
       valorTotal,
-      campanhaNome: campanha.nome,
+      campanhaNome: campanha.nome ?? "",
     });
   } catch (error) {
     console.error("Erro ao simular compra:", error);

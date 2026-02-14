@@ -21,7 +21,9 @@ export async function POST(request: NextRequest) {
     }
 
     await connectDB();
-    const doc = await Campanha.findOne({ _id: campanhaId, status: "ativa" }).lean();
+    const docRaw = await Campanha.findOne({ _id: campanhaId, status: "ativa" }).lean();
+    type DocLean = { valorPorTitulo?: number; userId?: unknown; nome?: string };
+    const doc = docRaw as DocLean | null;
     if (!doc || typeof doc.valorPorTitulo !== "number") {
       return NextResponse.json(
         { error: "Campanha não encontrada ou não está ativa" },
@@ -29,7 +31,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const cfg = await PagamentoConfig.findOne({ userId: doc.userId }).lean();
+    const cfgRaw = await PagamentoConfig.findOne({ userId: doc.userId }).lean();
+    const cfg = cfgRaw as unknown as { mpAccessToken?: string } | null;
     if (!cfg || !cfg.mpAccessToken) {
       console.error("Configuração Mercado Pago não encontrada para o usuário", doc.userId);
       return NextResponse.json(

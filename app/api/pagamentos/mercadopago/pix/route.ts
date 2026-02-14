@@ -67,7 +67,18 @@ export async function POST(request: NextRequest) {
     }
 
     await connectDB();
-    const doc = await Campanha.findOne({ _id: campanhaId, status: "ativa" }).lean();
+    const docRaw = await Campanha.findOne({ _id: campanhaId, status: "ativa" }).lean();
+    type DocLean = {
+      valorPorTitulo?: number;
+      userId?: unknown;
+      nome?: string;
+      promocao?: string;
+      quantidadeTitulos?: number;
+      modoTitulos?: string;
+      minutosPixExpirar?: number;
+      _id?: unknown;
+    };
+    const doc = docRaw as DocLean | null;
     if (!doc || typeof doc.valorPorTitulo !== "number") {
       return NextResponse.json(
         { error: "Campanha não encontrada ou não está ativa" },
@@ -75,7 +86,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const cfg = await PagamentoConfig.findOne({ userId: (doc as unknown as { userId?: unknown }).userId }).lean();
+    const cfg = await PagamentoConfig.findOne({ userId: doc.userId }).lean();
     const cfgAny = cfg as unknown as {
       mpModo?: "teste" | "producao";
       mpAccessToken?: string;
@@ -167,7 +178,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const tx = json?.point_of_interaction?.transaction_data;
+    const jsonWithPoi = json as { point_of_interaction?: { transaction_data?: { qr_code?: string; qr_code_base64?: string; ticket_url?: string } } };
+    const tx = jsonWithPoi?.point_of_interaction?.transaction_data;
     const qrCode = tx?.qr_code ?? null;
     const qrCodeBase64 = tx?.qr_code_base64 ?? null;
     // Link do Mercado Pago para o comprador abrir e pagar (em teste pode ser /sandbox/payments/...)
@@ -244,7 +256,7 @@ export async function POST(request: NextRequest) {
       qrCodeBase64: qrCodeBase64 ?? null,
       ticketUrl: ticketUrl || undefined,
       modo: modo ?? "teste",
-      campanhaId: doc._id,
+      campanhaId: doc._id ?? campanhaId,
       userId: doc.userId,
       campanhaNome: description,
       minutosPixExpirar: minutosPix,
