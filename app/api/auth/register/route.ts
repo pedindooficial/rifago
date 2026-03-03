@@ -39,7 +39,8 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ ok: true, message: "Conta criada com sucesso." });
   } catch (error) {
-    console.error("Erro ao registrar:", error);
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("Erro ao registrar:", message, error);
     return NextResponse.json(
       { error: "Erro ao criar conta. Tente novamente." },
       { status: 500 }

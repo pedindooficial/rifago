@@ -95,6 +95,7 @@ export default function CriarContaPage() {
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Seu nome"
                     className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    autoComplete="name"
                     required
                   />
                 </div>
@@ -111,6 +112,7 @@ export default function CriarContaPage() {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="seu@email.com"
                     className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    autoComplete="email"
                     required
                   />
                 </div>
@@ -127,6 +129,7 @@ export default function CriarContaPage() {
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Mínimo 6 caracteres"
                     className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    autoComplete="new-password"
                     required
                   />
                 </div>
@@ -143,6 +146,7 @@ export default function CriarContaPage() {
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="Repita a senha"
                     className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                    autoComplete="new-password"
                     required
                   />
                 </div>
