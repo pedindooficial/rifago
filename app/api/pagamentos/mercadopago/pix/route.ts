@@ -6,6 +6,7 @@ import Compra from "@/lib/models/Compra";
 import PagamentoConfig from "@/lib/models/PagamentoConfig";
 import PixSession from "@/lib/models/PixSession";
 import { parsePromocaoFromString, valorTotalComPromocao } from "@/lib/promocao";
+import { normalizarNumerosCotas } from "@/lib/formatadores";
 
 function mascararCpf(cpf: string): string {
   const n = cpf.replace(/\D/g, "").slice(-4);
@@ -244,7 +245,7 @@ export async function POST(request: NextRequest) {
         telefone: telefone?.trim() || undefined,
       },
       quantidade,
-      numeros: numerosAtribuidos,
+      numeros: normalizarNumerosCotas(numerosAtribuidos),
       valorTotal: transactionAmount,
       status: "pendente",
       pagamentoId: paymentId,

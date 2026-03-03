@@ -5,6 +5,7 @@ import Campanha from "@/lib/models/Campanha";
 import PagamentoConfig from "@/lib/models/PagamentoConfig";
 import Compra from "@/lib/models/Compra";
 import { parsePromocaoFromString, valorTotalComPromocao } from "@/lib/promocao";
+import { normalizarNumerosCotas } from "@/lib/formatadores";
 
 type Body = {
   campanhaId: string;
@@ -157,14 +158,14 @@ export async function POST(request: NextRequest) {
         telefone: telefone?.trim() || undefined,
       },
       quantidade,
-      numeros: numerosAtribuidos,
+      numeros: normalizarNumerosCotas(numerosAtribuidos),
       valorTotal,
       status: "simulada",
     });
 
     return NextResponse.json({
       compraId: compra._id.toString(),
-      numeros: numerosAtribuidos,
+      numeros: normalizarNumerosCotas(numerosAtribuidos),
       valorTotal,
       campanhaNome: campanha.nome ?? "",
     });

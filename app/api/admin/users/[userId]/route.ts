@@ -5,6 +5,7 @@ import { connectDB } from "@/lib/mongodb";
 import User from "@/lib/models/User";
 import Campanha from "@/lib/models/Campanha";
 import Compra from "@/lib/models/Compra";
+import { normalizarNumerosCotas } from "@/lib/formatadores";
 
 /** GET: detalhes completos do usuário (campanhas, vendas/compras). */
 export async function GET(
@@ -96,7 +97,7 @@ export async function GET(
           telefone: doc.comprador.telefone ?? "",
         },
         quantidade: doc.quantidade,
-        numeros: doc.numeros ?? [],
+        numeros: normalizarNumerosCotas(doc.numeros),
         valorTotal: doc.valorTotal,
         status: doc.status,
         createdAt: doc.createdAt instanceof Date ? doc.createdAt.toISOString() : String(doc.createdAt),

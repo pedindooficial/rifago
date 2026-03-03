@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 import { connectDB } from "@/lib/mongodb";
 import Campanha from "@/lib/models/Campanha";
 import Compra from "@/lib/models/Compra";
+import { normalizarNumerosCotas } from "@/lib/formatadores";
 
 /** GET: lista compras da campanha (apenas dono da campanha). */
 export async function GET(
@@ -59,7 +60,7 @@ export async function GET(
         id: doc._id.toString(),
         comprador: doc.comprador,
         quantidade: doc.quantidade,
-        numeros: doc.numeros,
+        numeros: normalizarNumerosCotas(doc.numeros),
         valorTotal: doc.valorTotal,
         status: doc.status,
         createdAt: doc.createdAt,

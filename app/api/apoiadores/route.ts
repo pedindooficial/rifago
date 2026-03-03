@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 import { connectDB } from "@/lib/mongodb";
 import Campanha from "@/lib/models/Campanha";
 import Compra from "@/lib/models/Compra";
+import { normalizarNumerosCotas } from "@/lib/formatadores";
 
 export type ApoiadorCompra = {
   campanhaId: string;
@@ -76,7 +77,7 @@ export async function GET(request: NextRequest) {
       const item: ApoiadorCompra = {
         campanhaId,
         campanhaNome: nomesPorId[campanhaId] ?? "Campanha",
-        numeros: doc.numeros ?? [],
+        numeros: normalizarNumerosCotas(doc.numeros),
         valorTotal: doc.valorTotal,
         quantidade: doc.quantidade,
         status: doc.status,

@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import { connectDB } from "@/lib/mongodb";
 import Compra from "@/lib/models/Compra";
 import Campanha from "@/lib/models/Campanha";
+import { normalizarNumerosCotas } from "@/lib/formatadores";
 
 /**
  * Área do comprador: busca compras por CPF + e-mail (compras pagas ou simuladas).
@@ -54,7 +55,7 @@ export async function POST(request: NextRequest) {
         quantidade?: number;
       };
       const id = doc.campanhaId.toString();
-      const numeros = doc.numeros ?? [];
+      const numeros = normalizarNumerosCotas(doc.numeros);
       const valorTotal = Number(doc.valorTotal) || 0;
       const quantidade = Number(doc.quantidade) || numeros.length;
       const existente = porCampanha.get(id);
