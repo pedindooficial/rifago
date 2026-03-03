@@ -434,7 +434,10 @@ export default function RifaPublicaPage() {
                                   });
                                 }}
                                 disabled={atMax}
-                                className="py-2.5 px-3 rounded-xl bg-green-600 text-white text-sm font-semibold hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                className={`py-2.5 px-3 rounded-xl text-white text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${
+                                  !corPrimaria ? "bg-green-600 hover:bg-green-700" : ""
+                                }`}
+                                style={corPrimaria ? { backgroundColor: corPrimaria } : undefined}
                               >
                                 +{n < 10 ? `0${n}` : n}
                               </button>
