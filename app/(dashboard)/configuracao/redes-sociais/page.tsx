@@ -13,6 +13,14 @@ type RedesForm = {
   youtube: string;
   tiktok: string;
   linkedin: string;
+  facebookAtivo: boolean;
+  instagramAtivo: boolean;
+  twitterAtivo: boolean;
+  whatsappAtivo: boolean;
+  whatsappGrupoAtivo: boolean;
+  youtubeAtivo: boolean;
+  tiktokAtivo: boolean;
+  linkedinAtivo: boolean;
 };
 
 const REDES = [
@@ -35,6 +43,14 @@ const defaultForm: RedesForm = {
   youtube: "",
   tiktok: "",
   linkedin: "",
+  facebookAtivo: true,
+  instagramAtivo: true,
+  twitterAtivo: true,
+  whatsappAtivo: true,
+  whatsappGrupoAtivo: true,
+  youtubeAtivo: true,
+  tiktokAtivo: true,
+  linkedinAtivo: true,
 };
 
 export default function RedesSociaisPage() {
@@ -75,6 +91,14 @@ export default function RedesSociaisPage() {
         youtube: form.youtube ?? "",
         tiktok: form.tiktok ?? "",
         linkedin: form.linkedin ?? "",
+        facebookAtivo: form.facebookAtivo ?? true,
+        instagramAtivo: form.instagramAtivo ?? true,
+        twitterAtivo: form.twitterAtivo ?? true,
+        whatsappAtivo: form.whatsappAtivo ?? true,
+        whatsappGrupoAtivo: form.whatsappGrupoAtivo ?? true,
+        youtubeAtivo: form.youtubeAtivo ?? true,
+        tiktokAtivo: form.tiktokAtivo ?? true,
+        linkedinAtivo: form.linkedinAtivo ?? true,
       };
       const res = await fetch("/api/config/redes-sociais", {
         method: "PUT",
@@ -91,7 +115,7 @@ export default function RedesSociaisPage() {
     }
   };
 
-  const set = (key: keyof RedesForm, value: string) => {
+  const set = (key: keyof RedesForm, value: string | boolean) => {
     setForm((f) => ({ ...f, [key]: value }));
   };
 
@@ -122,22 +146,46 @@ export default function RedesSociaisPage() {
               <p className="text-gray-500">Carregando...</p>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-5">
-                {REDES.map(({ key, label, placeholder, icon: Icon, color }) => (
-                  <div key={key}>
-                    <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                      <Icon className={`w-4 h-4 ${color}`} />
-                      {label}
-                    </label>
-                    <input
-                      type="text"
-                      inputMode="url"
-                      value={form[key]}
-                      onChange={(e) => set(key, e.target.value)}
-                      placeholder={placeholder}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm sm:text-base"
-                    />
-                  </div>
-                ))}
+                {REDES.map(({ key, label, placeholder, icon: Icon, color }) => {
+                  const ativoKey = `${key}Ativo` as keyof RedesForm;
+                  const ativo = form[ativoKey] as boolean;
+                  return (
+                    <div key={key} className="space-y-2">
+                      <div className="flex items-center justify-between gap-4">
+                        <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
+                          <Icon className={`w-4 h-4 ${color}`} />
+                          {label}
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer shrink-0">
+                          <span className="text-xs text-gray-500">Exibir na página da rifa</span>
+                          <button
+                            type="button"
+                            role="switch"
+                            aria-checked={ativo}
+                            onClick={() => set(ativoKey, !ativo)}
+                            className={`relative w-11 h-6 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
+                              ativo ? "bg-primary" : "bg-gray-300"
+                            }`}
+                          >
+                            <span
+                              className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${
+                                ativo ? "translate-x-5" : "translate-x-0"
+                              }`}
+                            />
+                          </button>
+                        </label>
+                      </div>
+                      <input
+                        type="text"
+                        inputMode="url"
+                        value={form[key]}
+                        onChange={(e) => set(key, e.target.value)}
+                        placeholder={placeholder}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm sm:text-base"
+                      />
+                    </div>
+                  );
+                })}
 
                 <button
                   type="submit"
@@ -152,7 +200,7 @@ export default function RedesSociaisPage() {
         </div>
 
         <p className="mt-6 text-sm text-gray-500 text-center">
-          Deixe em branco as redes que não deseja exibir. Os links serão exibidos na página da rifa (campanha pública).
+          Use o switch &quot;Exibir na página da rifa&quot; para mostrar ou esconder cada ícone na página de venda da campanha. Deixe em branco as redes que não deseja usar.
         </p>
       </div>
     </div>

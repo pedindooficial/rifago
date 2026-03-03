@@ -36,39 +36,29 @@ export async function GET(request: NextRequest) {
   const cfg = await RedesSociaisConfig.findOne({ userId: token.id }).lean();
 
   if (!cfg) {
-    return NextResponse.json({
-      facebook: "",
-      instagram: "",
-      twitter: "",
-      whatsapp: "",
-      whatsappGrupo: "",
-      youtube: "",
-      tiktok: "",
-      linkedin: "",
-    });
+    const base = { facebook: "", instagram: "", twitter: "", whatsapp: "", whatsappGrupo: "", youtube: "", tiktok: "", linkedin: "" };
+    const ativos = ["facebook", "instagram", "twitter", "whatsapp", "whatsappGrupo", "youtube", "tiktok", "linkedin"].reduce(
+      (acc, k) => ({ ...acc, [`${k}Ativo`]: true }),
+      {} as Record<string, boolean>
+    );
+    return NextResponse.json({ ...base, ...ativos });
   }
 
-  const c = cfg as unknown as {
-    facebook?: string;
-    instagram?: string;
-    twitter?: string;
-    whatsapp?: string;
-    whatsappGrupo?: string;
-    youtube?: string;
-    tiktok?: string;
-    linkedin?: string;
+  const c = cfg as unknown as Record<string, string | boolean | undefined>;
+  const out: Record<string, string | boolean> = {
+    facebook: (c.facebook as string) ?? "",
+    instagram: (c.instagram as string) ?? "",
+    twitter: (c.twitter as string) ?? "",
+    whatsapp: (c.whatsapp as string) ?? "",
+    whatsappGrupo: (c.whatsappGrupo as string) ?? "",
+    youtube: (c.youtube as string) ?? "",
+    tiktok: (c.tiktok as string) ?? "",
+    linkedin: (c.linkedin as string) ?? "",
   };
-
-  return NextResponse.json({
-    facebook: c.facebook ?? "",
-    instagram: c.instagram ?? "",
-    twitter: c.twitter ?? "",
-    whatsapp: c.whatsapp ?? "",
-    whatsappGrupo: c.whatsappGrupo ?? "",
-    youtube: c.youtube ?? "",
-    tiktok: c.tiktok ?? "",
-    linkedin: c.linkedin ?? "",
+  ["facebook", "instagram", "twitter", "whatsapp", "whatsappGrupo", "youtube", "tiktok", "linkedin"].forEach((k) => {
+    out[`${k}Ativo`] = c[`${k}Ativo`] !== false;
   });
+  return NextResponse.json(out);
 }
 
 export async function PUT(request: NextRequest) {
@@ -84,41 +74,26 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
 
-  const body = (await request.json()) as {
-    facebook?: string;
-    instagram?: string;
-    twitter?: string;
-    whatsapp?: string;
-    whatsappGrupo?: string;
-    youtube?: string;
-    tiktok?: string;
-    linkedin?: string;
-  };
+  const body = (await request.json()) as Record<string, string | boolean | undefined>;
 
   await connectDB();
 
-  // Só atualiza campos que vieram no body, para não sobrescrever com vazio se o cliente não enviar algum campo
-  const update: Record<string, string> = {};
-  const keys = [
-    "facebook",
-    "instagram",
-    "twitter",
-    "whatsapp",
-    "whatsappGrupo",
-    "youtube",
-    "tiktok",
-    "linkedin",
-  ] as const;
-  for (const key of keys) {
+  const update: Record<string, string | boolean> = {};
+  const urlKeys = ["facebook", "instagram", "twitter", "whatsapp", "whatsappGrupo", "youtube", "tiktok", "linkedin"] as const;
+  for (const key of urlKeys) {
     if (key in body) {
       const value = body[key];
-      if (key === "whatsapp") {
-        update[key] = normalizeWhatsApp(value);
-      } else {
-        update[key] = normalizeUrl(value);
+      if (typeof value === "string") {
+        update[key] = key === "whatsapp" ? normalizeWhatsApp(value) : normalizeUrl(value);
       }
     }
   }
+  urlKeys.forEach((k) => {
+    const ativoKey = `${k}Ativo`;
+    if (ativoKey in body && typeof body[ativoKey] === "boolean") {
+      update[ativoKey] = body[ativoKey];
+    }
+  });
 
   await RedesSociaisConfig.findOneAndUpdate(
     { userId: token.id },

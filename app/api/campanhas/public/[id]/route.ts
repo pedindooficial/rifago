@@ -61,10 +61,13 @@ export async function GET(
     if (docWithUserId.userId) {
       const redes = await RedesSociaisConfig.findOne({ userId: docWithUserId.userId }).lean();
       if (redes) {
-        const r = redes as Record<string, string | undefined>;
+        const r = redes as Record<string, string | boolean | undefined>;
         ["facebook", "instagram", "twitter", "whatsapp", "whatsappGrupo", "youtube", "tiktok", "linkedin"].forEach((key) => {
           const v = r[key];
-          if (v && String(v).trim() !== "") redesSociais[key] = String(v).trim();
+          const ativo = r[`${key}Ativo`];
+          if (v && String(v).trim() !== "" && ativo !== false) {
+            redesSociais[key] = String(v).trim();
+          }
         });
       }
     }
