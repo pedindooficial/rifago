@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { MessageSquare, Send, User, Loader2, ChevronRight } from "lucide-react";
 
 type Thread = { userId: string; email: string; name: string; lastAt?: string };
 type Message = { sender: string; content: string; createdAt: string };
 
-export default function AdminChatPage() {
+function AdminChatContent() {
   const searchParams = useSearchParams();
   const userIdFromUrl = searchParams.get("userId");
   const [threads, setThreads] = useState<Thread[]>([]);
@@ -216,5 +216,13 @@ export default function AdminChatPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AdminChatPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-amber-600" /></div>}>
+      <AdminChatContent />
+    </Suspense>
   );
 }

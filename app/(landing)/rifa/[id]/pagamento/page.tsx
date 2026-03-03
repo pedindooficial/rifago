@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, Suspense } from "react";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Ticket, Copy, CheckCircle2, Share2, Loader2 } from "lucide-react";
@@ -24,7 +24,7 @@ type SessionData = {
   valorTotal: number;
 };
 
-export default function PagamentoPixPage() {
+function PagamentoPixContent() {
   const params = useParams();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -334,5 +334,13 @@ export default function PagamentoPixPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function PagamentoPixPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>}>
+      <PagamentoPixContent />
+    </Suspense>
   );
 }
