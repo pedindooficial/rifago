@@ -3,12 +3,6 @@ import { getToken } from "next-auth/jwt";
 import { connectDB } from "@/lib/mongodb";
 import RedesSociaisConfig from "@/lib/models/RedesSociaisConfig";
 
-const JWT_SECRET = process.env.NEXTAUTH_SECRET;
-
-if (!JWT_SECRET) {
-  throw new Error("NEXTAUTH_SECRET não definido para a API de redes sociais");
-}
-
 function normalizeUrl(value: string | undefined): string {
   if (!value || typeof value !== "string") return "";
   const trimmed = value.trim();
@@ -26,7 +20,14 @@ function normalizeWhatsApp(value: string | undefined): string {
 }
 
 export async function GET(request: NextRequest) {
-  const token = await getToken({ req: request, secret: JWT_SECRET });
+  const secret = process.env.NEXTAUTH_SECRET;
+  if (!secret) {
+    return NextResponse.json(
+      { error: "NEXTAUTH_SECRET não configurado" },
+      { status: 500 }
+    );
+  }
+  const token = await getToken({ req: request, secret });
   if (!token?.id) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
@@ -71,7 +72,14 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
-  const token = await getToken({ req: request, secret: JWT_SECRET });
+  const secret = process.env.NEXTAUTH_SECRET;
+  if (!secret) {
+    return NextResponse.json(
+      { error: "NEXTAUTH_SECRET não configurado" },
+      { status: 500 }
+    );
+  }
+  const token = await getToken({ req: request, secret });
   if (!token?.id) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
