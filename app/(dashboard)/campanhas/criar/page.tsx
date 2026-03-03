@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Plus,
@@ -128,7 +128,7 @@ const schema = z
 
 type FormData = z.infer<typeof schema>;
 
-export default function CriarCampanha() {
+function CriarCampanhaContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const editarId = searchParams.get("editar");
@@ -1316,5 +1316,22 @@ export default function CriarCampanha() {
         )}
       </div>
     </div>
+  );
+}
+
+const fallbackCriar = (
+  <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+    <div className="text-center">
+      <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+      <p className="text-gray-600">Carregando...</p>
+    </div>
+  </div>
+);
+
+export default function CriarCampanhaPage() {
+  return (
+    <Suspense fallback={fallbackCriar}>
+      <CriarCampanhaContent />
+    </Suspense>
   );
 }
