@@ -97,6 +97,23 @@ export default function RifaPublicaPage() {
       .finally(() => setLoadingRanking(false));
   }, [campanha?.id, campanha?.rankingVisivel]);
 
+  useEffect(() => {
+    if (!campanha) return;
+    const tituloAba = campanha.brandingSiteTitle
+      ? `${campanha.brandingSiteTitle} | ${campanha.nome}`
+      : campanha.nome;
+    document.title = tituloAba;
+    if (campanha.brandingFaviconUrl) {
+      let link = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
+      if (!link) {
+        link = document.createElement("link");
+        link.rel = "icon";
+        document.head.appendChild(link);
+      }
+      link.href = campanha.brandingFaviconUrl;
+    }
+  }, [campanha]);
+
   const titulosVendidos = campanha?.titulosVendidos ?? 0;
   const titulosPendentes = campanha?.titulosPendentes ?? 0;
   const quantidadeTotal = campanha?.quantidadeTitulos ?? 0;
@@ -246,24 +263,8 @@ export default function RifaPublicaPage() {
     );
   }
 
-  const tituloAba = campanha.brandingSiteTitle
-    ? `${campanha.brandingSiteTitle} | ${campanha.nome}`
-    : campanha.nome;
   const corPrimaria = campanha.brandingPrimaryColor || undefined;
   const textoBotao = campanha.brandingCtaText?.trim() || "Participar";
-
-  useEffect(() => {
-    document.title = tituloAba;
-    if (campanha.brandingFaviconUrl) {
-      let link = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
-      if (!link) {
-        link = document.createElement("link");
-        link.rel = "icon";
-        document.head.appendChild(link);
-      }
-      link.href = campanha.brandingFaviconUrl;
-    }
-  }, [tituloAba, campanha.brandingFaviconUrl]);
 
   return (
     <div className="min-h-screen bg-gray-50">

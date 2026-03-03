@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
   ArrowLeft,
@@ -20,6 +20,8 @@ import {
   Link2,
   Send,
   X,
+  MessageCircle,
+  Copy,
 } from "lucide-react";
 import Link from "next/link";
 import { obterCampanha, deletarCampanha, publicarCampanha, Campanha } from "@/lib/api";
@@ -34,6 +36,21 @@ export default function GerenciarCampanha() {
   const [modalPublicarAberto, setModalPublicarAberto] = useState(false);
   const [publicando, setPublicando] = useState(false);
   const [linkCopiado, setLinkCopiado] = useState(false);
+  const [shareMenuAberto, setShareMenuAberto] = useState(false);
+  const [copiadoTipo, setCopiadoTipo] = useState<"link" | "texto" | null>(null);
+  const shareMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickFora(e: MouseEvent) {
+      if (shareMenuRef.current && !shareMenuRef.current.contains(e.target as Node)) {
+        setShareMenuAberto(false);
+      }
+    }
+    if (shareMenuAberto) {
+      document.addEventListener("click", handleClickFora);
+      return () => document.removeEventListener("click", handleClickFora);
+    }
+  }, [shareMenuAberto]);
 
   useEffect(() => {
     async function carregarCampanha() {
@@ -75,16 +92,67 @@ export default function GerenciarCampanha() {
     }
   };
 
-  const handleCompartilhar = async () => {
-    if (!campanha) return;
-    const url = `${typeof window !== "undefined" ? window.location.origin : ""}/rifa/${campanha.id}`;
+  const shareUrl =
+    typeof window !== "undefined" ? `${window.location.origin}/rifa/${campanha?.id}` : "";
+  const shareTextoPronto = campanha
+    ? `🎉 Confira essa rifa: ${campanha.nome}\n\nParticipe aqui: ${shareUrl}`
+    : "";
+
+  const copiarLink = async () => {
+    if (!shareUrl) return;
     try {
-      await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText(shareUrl);
       setLinkCopiado(true);
-      setTimeout(() => setLinkCopiado(false), 2500);
+      setCopiadoTipo("link");
+      setTimeout(() => {
+        setLinkCopiado(false);
+        setCopiadoTipo(null);
+      }, 2500);
+      setShareMenuAberto(false);
     } catch {
-      alert("Link da campanha: " + url);
+      alert("Link da campanha: " + shareUrl);
     }
+  };
+
+  const copiarTextoCompartilhar = async () => {
+    if (!shareTextoPronto) return;
+    try {
+      await navigator.clipboard.writeText(shareTextoPronto);
+      setCopiadoTipo("texto");
+      setTimeout(() => setCopiadoTipo(null), 2500);
+      setShareMenuAberto(false);
+    } catch {
+      alert(shareTextoPronto);
+    }
+  };
+
+  const abrirWhatsApp = () => {
+    if (!shareTextoPronto) return;
+    const url = `https://wa.me/?text=${encodeURIComponent(shareTextoPronto)}`;
+    window.open(url, "_blank", "noopener,noreferrer");
+    setShareMenuAberto(false);
+  };
+
+  const abrirFacebook = () => {
+    if (!shareUrl) return;
+    window.open(
+      `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
+      "_blank",
+      "noopener,noreferrer"
+    );
+    setShareMenuAberto(false);
+  };
+
+  const abrirTwitter = () => {
+    const text = campanha
+      ? `Confira essa rifa: ${campanha.nome} ${shareUrl}`
+      : shareUrl;
+    window.open(
+      `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`,
+      "_blank",
+      "noopener,noreferrer"
+    );
+    setShareMenuAberto(false);
   };
 
   const titulosVendidos = campanha?.titulosVendidos ?? 0;
@@ -170,20 +238,69 @@ export default function GerenciarCampanha() {
             >
               <Eye className="w-5 h-5" />
             </Link>
-            <div className="relative">
+            <div className="relative" ref={shareMenuRef}>
               <button
                 type="button"
-                onClick={handleCompartilhar}
-                className="p-2.5 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50"
-                title={linkCopiado ? "Link copiado!" : "Copiar link da campanha"}
+                onClick={() => setShareMenuAberto((v) => !v)}
+                className="p-2.5 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 flex items-center gap-1"
+                title="Compartilhar campanha"
                 aria-label="Compartilhar"
+                aria-expanded={shareMenuAberto}
               >
                 <Share2 className="w-5 h-5" />
+                <ChevronDown className="w-4 h-4 opacity-70" />
               </button>
-              {linkCopiado && (
+              {(linkCopiado || copiadoTipo) && (
                 <span className="absolute -top-1 -right-1 text-[10px] font-medium text-green-600 bg-green-100 px-1.5 py-0.5 rounded whitespace-nowrap">
-                  Copiado!
+                  {copiadoTipo === "texto" ? "Texto copiado!" : "Link copiado!"}
                 </span>
+              )}
+              {shareMenuAberto && (
+                <div className="absolute right-0 top-full mt-1 w-56 rounded-xl border border-gray-200 bg-white py-2 shadow-lg z-50">
+                  <p className="px-3 py-1.5 text-xs font-medium text-gray-500 uppercase tracking-wide">
+                    Compartilhar
+                  </p>
+                  <button
+                    type="button"
+                    onClick={copiarLink}
+                    className="flex w-full items-center gap-3 px-3 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50"
+                  >
+                    <Link2 className="w-4 h-4 text-gray-500 shrink-0" />
+                    Copiar link
+                  </button>
+                  <button
+                    type="button"
+                    onClick={copiarTextoCompartilhar}
+                    className="flex w-full items-center gap-3 px-3 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50"
+                  >
+                    <Copy className="w-4 h-4 text-gray-500 shrink-0" />
+                    Copiar texto para redes sociais
+                  </button>
+                  <button
+                    type="button"
+                    onClick={abrirWhatsApp}
+                    className="flex w-full items-center gap-3 px-3 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50"
+                  >
+                    <MessageCircle className="w-4 h-4 text-[#25D366] shrink-0" />
+                    Compartilhar no WhatsApp
+                  </button>
+                  <button
+                    type="button"
+                    onClick={abrirFacebook}
+                    className="flex w-full items-center gap-3 px-3 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50"
+                  >
+                    <Share2 className="w-4 h-4 text-[#1877F2] shrink-0" />
+                    Compartilhar no Facebook
+                  </button>
+                  <button
+                    type="button"
+                    onClick={abrirTwitter}
+                    className="flex w-full items-center gap-3 px-3 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50"
+                  >
+                    <Share2 className="w-4 h-4 text-[#1DA1F2] shrink-0" />
+                    Compartilhar no X (Twitter)
+                  </button>
+                </div>
               )}
             </div>
             <Link
