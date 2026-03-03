@@ -66,6 +66,10 @@ export interface Campanha {
   brandingLogoUrl?: string;
   brandingFaviconUrl?: string;
   brandingSiteTitle?: string;
+  brandingPrimaryColor?: string;
+  brandingCtaText?: string;
+  brandingSlogan?: string;
+  brandingFooterText?: string;
 }
 
 export interface CriarCampanhaData {

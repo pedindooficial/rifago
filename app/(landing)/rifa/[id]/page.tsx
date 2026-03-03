@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Head from "next/head";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Gift, Percent, ChevronDown, Ticket, CheckCircle2, Facebook, Instagram, Twitter, MessageCircle, Users, Youtube, Share2, Linkedin, Minus, Plus, Trophy, Medal, Award } from "lucide-react";
@@ -247,15 +246,27 @@ export default function RifaPublicaPage() {
     );
   }
 
+  const tituloAba = campanha.brandingSiteTitle
+    ? `${campanha.brandingSiteTitle} | ${campanha.nome}`
+    : campanha.nome;
+  const corPrimaria = campanha.brandingPrimaryColor || undefined;
+  const textoBotao = campanha.brandingCtaText?.trim() || "Participar";
+
+  useEffect(() => {
+    document.title = tituloAba;
+    if (campanha.brandingFaviconUrl) {
+      let link = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
+      if (!link) {
+        link = document.createElement("link");
+        link.rel = "icon";
+        document.head.appendChild(link);
+      }
+      link.href = campanha.brandingFaviconUrl;
+    }
+  }, [tituloAba, campanha.brandingFaviconUrl]);
+
   return (
-    <>
-      <Head>
-        {campanha.brandingSiteTitle && <title>{campanha.brandingSiteTitle}</title>}
-        {campanha.brandingFaviconUrl && (
-          <link rel="icon" href={campanha.brandingFaviconUrl} />
-        )}
-      </Head>
-      <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50">
       {/* Header público */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
@@ -297,6 +308,11 @@ export default function RifaPublicaPage() {
               <h1 className="text-2xl sm:text-3xl font-bold text-white drop-shadow-lg">
                 {campanha.nome}
               </h1>
+              {campanha.brandingSlogan && (
+                <p className="text-sm sm:text-base text-white/95 drop-shadow mt-1">
+                  {campanha.brandingSlogan}
+                </p>
+              )}
               {campanha.status === "finalizada" && (
                 <span className="inline-block mt-2 px-3 py-1 rounded-full text-xs font-medium bg-gray-500/90 text-white">
                   Encerrada
@@ -435,10 +451,11 @@ export default function RifaPublicaPage() {
                     <button
                       type="button"
                       onClick={handleParticipar}
-                      className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 rounded-xl bg-primary hover:bg-primary-dark text-white font-semibold text-base transition-colors"
+                      className={`inline-flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 rounded-xl text-white font-semibold text-base transition-colors ${!corPrimaria ? "bg-primary hover:bg-primary-dark" : ""}`}
+                      style={corPrimaria ? { backgroundColor: corPrimaria } : undefined}
                     >
                       <Ticket className="w-5 h-5" />
-                      Participar
+                      {textoBotao}
                     </button>
                   </>
                 ) : (
@@ -723,6 +740,14 @@ export default function RifaPublicaPage() {
         </div>
       </div>
 
+      {campanha.brandingFooterText && (
+        <footer className="border-t border-gray-200 bg-white py-6 mt-8">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm text-gray-600">
+            {campanha.brandingFooterText}
+          </div>
+        </footer>
+      )}
+
       {/* Ícone flutuante: Grupo do WhatsApp */}
       {campanha?.redesSociais?.whatsappGrupo && (
         <a
@@ -764,6 +789,5 @@ export default function RifaPublicaPage() {
         </div>
       )}
     </div>
-    </>
   );
 }

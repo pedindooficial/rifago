@@ -7,6 +7,20 @@ type BrandingPayload = {
   siteTitle?: string;
   logoUrl?: string;
   faviconUrl?: string;
+  primaryColor?: string;
+  ctaButtonText?: string;
+  slogan?: string;
+  footerText?: string;
+};
+
+const emptyPayload: BrandingPayload = {
+  siteTitle: "",
+  logoUrl: "",
+  faviconUrl: "",
+  primaryColor: "",
+  ctaButtonText: "",
+  slogan: "",
+  footerText: "",
 };
 
 export async function GET(request: NextRequest) {
@@ -25,11 +39,7 @@ export async function GET(request: NextRequest) {
   await connectDB();
   const cfg = await BrandingConfig.findOne({ userId: token.id }).lean();
   if (!cfg) {
-    return NextResponse.json<BrandingPayload>({
-      siteTitle: "",
-      logoUrl: "",
-      faviconUrl: "",
-    });
+    return NextResponse.json<BrandingPayload>(emptyPayload);
   }
 
   const c = cfg as unknown as BrandingPayload;
@@ -37,6 +47,10 @@ export async function GET(request: NextRequest) {
     siteTitle: c.siteTitle ?? "",
     logoUrl: c.logoUrl ?? "",
     faviconUrl: c.faviconUrl ?? "",
+    primaryColor: c.primaryColor ?? "",
+    ctaButtonText: c.ctaButtonText ?? "",
+    slogan: c.slogan ?? "",
+    footerText: c.footerText ?? "",
   });
 }
 
@@ -56,15 +70,12 @@ export async function PUT(request: NextRequest) {
   const body = (await request.json()) as BrandingPayload;
   await connectDB();
 
-  const update: BrandingPayload = {};
-  if (typeof body.siteTitle === "string") {
-    update.siteTitle = body.siteTitle.trim();
-  }
-  if (typeof body.logoUrl === "string") {
-    update.logoUrl = body.logoUrl.trim();
-  }
-  if (typeof body.faviconUrl === "string") {
-    update.faviconUrl = body.faviconUrl.trim();
+  const update: Record<string, string> = {};
+  const keys: (keyof BrandingPayload)[] = ["siteTitle", "logoUrl", "faviconUrl", "primaryColor", "ctaButtonText", "slogan", "footerText"];
+  for (const key of keys) {
+    if (key in body && typeof body[key] === "string") {
+      update[key] = (body[key] as string).trim();
+    }
   }
 
   await BrandingConfig.findOneAndUpdate(

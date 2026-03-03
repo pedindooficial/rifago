@@ -3,12 +3,18 @@ import mongoose from "mongoose";
 export interface IBrandingConfig {
   _id: mongoose.Types.ObjectId;
   userId: mongoose.Types.ObjectId;
-  /** Título exibido na aba/navegador (opcional) */
+  /** Nome da marca (usado na aba: "Marca | Nome da campanha") */
   siteTitle?: string;
-  /** Logo principal (data URL ou URL pública) */
   logoUrl?: string;
-  /** Favicon (data URL ou URL pública) */
   faviconUrl?: string;
+  /** Cor primária (hex, ex: #DC2626) para botões e destaques */
+  primaryColor?: string;
+  /** Texto do botão principal (ex.: Participar, Comprar cotas) */
+  ctaButtonText?: string;
+  /** Slogan ou frase de destaque abaixo do nome da campanha */
+  slogan?: string;
+  /** Texto exibido no rodapé da página da rifa */
+  footerText?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -25,6 +31,10 @@ const BrandingConfigSchema = new mongoose.Schema<IBrandingConfig>(
     siteTitle: { type: String, default: "", trim: true },
     logoUrl: { type: String, default: "", trim: true },
     faviconUrl: { type: String, default: "", trim: true },
+    primaryColor: { type: String, default: "", trim: true },
+    ctaButtonText: { type: String, default: "", trim: true },
+    slogan: { type: String, default: "", trim: true },
+    footerText: { type: String, default: "", trim: true },
   },
   { timestamps: true }
 );

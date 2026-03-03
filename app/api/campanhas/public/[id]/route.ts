@@ -62,6 +62,10 @@ export async function GET(
     let brandingLogoUrl = "";
     let brandingFaviconUrl = "";
     let brandingSiteTitle = "";
+    let brandingPrimaryColor = "";
+    let brandingCtaText = "";
+    let brandingSlogan = "";
+    let brandingFooterText = "";
 
     if (docWithUserId.userId) {
       const [redes, branding] = await Promise.all([
@@ -85,10 +89,18 @@ export async function GET(
           logoUrl?: string;
           faviconUrl?: string;
           siteTitle?: string;
+          primaryColor?: string;
+          ctaButtonText?: string;
+          slogan?: string;
+          footerText?: string;
         };
         brandingLogoUrl = b.logoUrl?.trim() || "";
         brandingFaviconUrl = b.faviconUrl?.trim() || "";
         brandingSiteTitle = b.siteTitle?.trim() || "";
+        brandingPrimaryColor = b.primaryColor?.trim() || "";
+        brandingCtaText = b.ctaButtonText?.trim() || "";
+        brandingSlogan = b.slogan?.trim() || "";
+        brandingFooterText = b.footerText?.trim() || "";
       }
     }
 
@@ -99,6 +111,10 @@ export async function GET(
       brandingLogoUrl: brandingLogoUrl || undefined,
       brandingFaviconUrl: brandingFaviconUrl || undefined,
       brandingSiteTitle: brandingSiteTitle || undefined,
+      brandingPrimaryColor: brandingPrimaryColor || undefined,
+      brandingCtaText: brandingCtaText || undefined,
+      brandingSlogan: brandingSlogan || undefined,
+      brandingFooterText: brandingFooterText || undefined,
     });
   } catch (error) {
     console.error("Erro ao obter campanha pública:", error);
