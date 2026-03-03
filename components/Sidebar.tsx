@@ -14,7 +14,6 @@ import {
   Settings,
   Headphones,
   LogOut,
-  X,
   User,
   ChevronDown,
   ChevronUp,
@@ -46,19 +45,9 @@ export default function Sidebar({ mobileOpen = false, onClose }: SidebarProps) {
 
   const content = (
     <>
-      {/* Logo + fechar no mobile */}
+      {/* Logo (fechar no mobile fica no header do MainLayout) */}
       <div className="p-4 border-b border-gray-100 flex items-center justify-between">
         <Logo href="/dashboard" size="md" />
-        {onClose && (
-          <button
-            type="button"
-            onClick={onClose}
-            className="lg:hidden p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-900"
-            aria-label="Fechar menu"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        )}
       </div>
 
       <div className="p-4">
@@ -188,7 +177,7 @@ export default function Sidebar({ mobileOpen = false, onClose }: SidebarProps) {
         />
       )}
       <aside
-        className={`fixed left-0 top-0 z-50 h-screen w-64 max-w-[85vw] border-r border-gray-200 bg-white flex flex-col transition-transform duration-300 ease-out lg:translate-x-0 ${
+        className={`fixed left-0 top-0 z-50 h-screen w-64 max-w-[85vw] border-r border-gray-200 bg-white flex flex-col overflow-hidden transition-transform duration-300 ease-out lg:translate-x-0 ${
           onClose ? (mobileOpen ? "translate-x-0" : "-translate-x-full") : ""
         }`}
       >
