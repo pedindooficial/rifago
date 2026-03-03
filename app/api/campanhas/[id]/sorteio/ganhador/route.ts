@@ -47,13 +47,36 @@ export async function GET(
 
     const numeroNormalizado = String(numeroInt);
 
-    const compra = await Compra.findOne({
+    // Busca considerando string e number (Mongo pode ter gravado como número)
+    let compras = await Compra.find({
       campanhaId: new mongoose.Types.ObjectId(campanhaId),
       status: { $in: ["paga", "simulada"] },
-      numeros: numeroNormalizado,
+      $or: [
+        { numeros: numeroNormalizado },
+        { numeros: numeroInt },
+      ],
     })
-      .select("comprador.nome")
+      .select("comprador.nome numeros")
       .lean();
+
+    let compra: (typeof compras)[0] | null = compras[0] ?? null;
+
+    // Se não achou, procura normalizando cada número (ex.: "04515" vs "4515")
+    if (!compra) {
+      const todas = await Compra.find({
+        campanhaId: new mongoose.Types.ObjectId(campanhaId),
+        status: { $in: ["paga", "simulada"] },
+      })
+        .select("comprador.nome numeros")
+        .lean();
+      compra =
+        todas.find((c) => {
+          const nums = (c as unknown as { numeros?: (string | number)[] }).numeros ?? [];
+          return nums.some(
+            (n) => String(parseInt(String(n).trim(), 10) || 0) === numeroNormalizado
+          );
+        }) ?? null;
+    }
 
     if (!compra) {
       return NextResponse.json(
