@@ -11,6 +11,12 @@ type LogoProps = {
   height?: number;
   /** "xs" = menu/barra (bem pequena), "sm" = compacto, "md" = sidebar, "lg" = destaque */
   size?: "xs" | "sm" | "md" | "lg";
+  /** Opcional: URL ou data URL de logo personalizada. Se não informado, usa /logo.png */
+  imageSrc?: string;
+  /** Texto alternativo / fallback quando a imagem falhar */
+  alt?: string;
+  /** Texto a exibir quando não conseguir carregar a imagem */
+  fallbackText?: string;
 };
 
 const boxSize = {
@@ -21,9 +27,20 @@ const boxSize = {
   lg: "h-20 max-h-20 w-72 max-w-[360px]",
 };
 
-export default function Logo({ href = "/", className = "", width = 200, height = 56, size = "lg" }: LogoProps) {
+export default function Logo({
+  href = "/",
+  className = "",
+  width = 200,
+  height = 56,
+  size = "lg",
+  imageSrc,
+  alt,
+  fallbackText,
+}: LogoProps) {
   const [erro, setErro] = useState(false);
   const boxClass = boxSize[size];
+  const src = imageSrc && !erro ? imageSrc : "/logo.png";
+  const label = fallbackText || alt || "Rifago";
 
   const conteudo = erro ? (
     <span
@@ -31,13 +48,13 @@ export default function Logo({ href = "/", className = "", width = 200, height =
         size === "xs" ? "text-sm" : size === "lg" ? "text-xl sm:text-2xl" : "text-lg"
       }`}
     >
-      Rifago
+      {label}
     </span>
   ) : (
     <span className={`relative block shrink-0 overflow-hidden ${boxClass} ${className}`}>
       <Image
-        src="/logo.png"
-        alt="Rifago"
+        src={src}
+        alt={alt || "Rifago"}
         fill
         sizes="150px"
         className="object-contain object-left"

@@ -62,6 +62,10 @@ export interface Campanha {
     tiktok?: string;
     linkedin?: string;
   };
+  /** Branding do organizador para a página pública */
+  brandingLogoUrl?: string;
+  brandingFaviconUrl?: string;
+  brandingSiteTitle?: string;
 }
 
 export interface CriarCampanhaData {

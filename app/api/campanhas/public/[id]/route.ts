@@ -4,6 +4,7 @@ import { connectDB } from "@/lib/mongodb";
 import Campanha from "@/lib/models/Campanha";
 import Compra from "@/lib/models/Compra";
 import RedesSociaisConfig from "@/lib/models/RedesSociaisConfig";
+import BrandingConfig from "@/lib/models/BrandingConfig";
 import { docToCampanha } from "@/lib/campanhas-db";
 
 async function getStatsCampanha(campanhaId: string): Promise<{
@@ -58,8 +59,16 @@ export async function GET(
     const stats = await getStatsCampanha(id);
     const docWithUserId = doc as unknown as { userId?: unknown };
     let redesSociais: Record<string, string> = {};
+    let brandingLogoUrl = "";
+    let brandingFaviconUrl = "";
+    let brandingSiteTitle = "";
+
     if (docWithUserId.userId) {
-      const redes = await RedesSociaisConfig.findOne({ userId: docWithUserId.userId }).lean();
+      const [redes, branding] = await Promise.all([
+        RedesSociaisConfig.findOne({ userId: docWithUserId.userId }).lean(),
+        BrandingConfig.findOne({ userId: docWithUserId.userId }).lean(),
+      ]);
+
       if (redes) {
         const r = redes as Record<string, string | boolean | undefined>;
         ["facebook", "instagram", "twitter", "whatsapp", "whatsappGrupo", "youtube", "tiktok", "linkedin"].forEach((key) => {
@@ -70,8 +79,27 @@ export async function GET(
           }
         });
       }
+
+      if (branding) {
+        const b = branding as unknown as {
+          logoUrl?: string;
+          faviconUrl?: string;
+          siteTitle?: string;
+        };
+        brandingLogoUrl = b.logoUrl?.trim() || "";
+        brandingFaviconUrl = b.faviconUrl?.trim() || "";
+        brandingSiteTitle = b.siteTitle?.trim() || "";
+      }
     }
-    return NextResponse.json({ ...campanha, ...stats, redesSociais });
+
+    return NextResponse.json({
+      ...campanha,
+      ...stats,
+      redesSociais,
+      brandingLogoUrl: brandingLogoUrl || undefined,
+      brandingFaviconUrl: brandingFaviconUrl || undefined,
+      brandingSiteTitle: brandingSiteTitle || undefined,
+    });
   } catch (error) {
     console.error("Erro ao obter campanha pública:", error);
     return NextResponse.json(

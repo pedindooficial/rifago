@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Head from "next/head";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Gift, Percent, ChevronDown, Ticket, CheckCircle2, Facebook, Instagram, Twitter, MessageCircle, Users, Youtube, Share2, Linkedin, Minus, Plus, Trophy, Medal, Award } from "lucide-react";
@@ -247,11 +248,23 @@ export default function RifaPublicaPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <>
+      <Head>
+        {campanha.brandingSiteTitle && <title>{campanha.brandingSiteTitle}</title>}
+        {campanha.brandingFaviconUrl && (
+          <link rel="icon" href={campanha.brandingFaviconUrl} />
+        )}
+      </Head>
+      <div className="min-h-screen bg-gray-50">
       {/* Header público */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
-          <Logo href="/" size="xs" />
+          <Logo
+            href="/"
+            size="xs"
+            imageSrc={campanha.brandingLogoUrl}
+            alt={campanha.brandingSiteTitle || campanha.nome}
+          />
           <Link
             href="/meus-numeros"
             className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 font-medium text-xs sm:text-sm"
@@ -751,5 +764,6 @@ export default function RifaPublicaPage() {
         </div>
       )}
     </div>
+    </>
   );
 }
