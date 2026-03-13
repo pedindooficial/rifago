@@ -138,8 +138,8 @@ export default function RifaPublicaPage() {
   const valorCota = campanha?.valorPorTitulo ?? 0;
   const totalComprar = valorTotalComPromocao(promocoes, quantidade, valorCota);
 
-  const mostrarProgresso =
-    campanha?.status === "ativa" && campanha?.progressoVisivel;
+  const mostrarProgresso = campanha?.status === "ativa";
+  const mostrarDetalhesProgresso = campanha?.progressoVisivel !== false;
 
   const handleParticipar = () => {
     setPasso(2);
@@ -343,9 +343,15 @@ export default function RifaPublicaPage() {
                   )}
                 </div>
                 <p className="text-sm text-gray-600">
-                  {percentualVendidoTexto}% vendido · {titulosVendidos.toLocaleString("pt-BR")} de{" "}
-                  {campanha.quantidadeTitulos.toLocaleString("pt-BR")} cotas
-                  {titulosPendentes > 0 && (
+                  {percentualVendidoTexto}% vendido
+                  {mostrarDetalhesProgresso && (
+                    <>
+                      {" "}
+                      · {titulosVendidos.toLocaleString("pt-BR")} de{" "}
+                      {campanha.quantidadeTitulos.toLocaleString("pt-BR")} cotas
+                    </>
+                  )}
+                  {mostrarDetalhesProgresso && titulosPendentes > 0 && (
                     <span className="text-amber-700 font-medium">
                       {" "}
                       · {titulosPendentes.toLocaleString("pt-BR")} reservadas (pendentes)

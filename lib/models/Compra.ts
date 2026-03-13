@@ -2,6 +2,16 @@ import mongoose from "mongoose";
 
 export type StatusCompra = "pendente" | "paga" | "simulada" | "cancelada";
 
+/**
+ * Regras de negócio para status e cotas:
+ *
+ * - titulosVendidos (contagem na campanha): só compras "paga" e "simulada".
+ * - Cotas ocupadas (não podem ser vendidas de novo): "paga", "simulada" e "pendente".
+ *   Compra "cancelada" libera as cotas (os números voltam a ficar disponíveis).
+ * - Sorteio (ganhador): só considera "paga" e "simulada".
+ * - Números são normalizados sem zero à esquerda ao comparar (ex.: "02889" === "2889").
+ */
+
 export interface ICompra {
   _id: mongoose.Types.ObjectId;
   campanhaId: mongoose.Types.ObjectId;
