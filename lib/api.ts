@@ -96,6 +96,7 @@ export interface CriarCampanhaData {
   progressoVisivel?: boolean;
   premios?: string;
   promocao?: string;
+  status?: "rascunho" | "ativa" | "pausada" | "finalizada";
 }
 
 export async function criarCampanha(
