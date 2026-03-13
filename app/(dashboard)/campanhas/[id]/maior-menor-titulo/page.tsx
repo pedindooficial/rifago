@@ -15,6 +15,7 @@ type TituloResumo = {
   valorTotal: number | null;
   status: StatusCompra | null;
   createdAt: string | null;
+  numerosCompra?: string[] | null;
 };
 
 type MaiorMenorData = {
