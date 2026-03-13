@@ -33,6 +33,7 @@ export default function MinhasCampanhas() {
 
   const statusTag = (c: Campanha) => {
     if (c.status === "ativa") return { label: "Ativa", className: "bg-green-100 text-green-800" };
+    if (c.status === "pausada") return { label: "Pausada", className: "bg-yellow-100 text-yellow-800" };
     if (c.status === "finalizada") return { label: "Finalizada", className: "bg-gray-100 text-gray-800" };
     return { label: "Pendente", className: "bg-amber-100 text-amber-800" };
   };

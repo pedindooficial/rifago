@@ -28,7 +28,7 @@ export interface ICampanha {
   rankingVisivel?: boolean;
   premios?: string;
   promocao?: string;
-  status: "rascunho" | "ativa" | "finalizada";
+  status: "rascunho" | "ativa" | "pausada" | "finalizada";
   createdAt: Date;
   updatedAt: Date;
 }
@@ -60,7 +60,7 @@ const CampanhaSchema = new mongoose.Schema<ICampanha>(
     rankingVisivel: { type: Boolean, default: false },
     premios: { type: String },
     promocao: { type: String },
-    status: { type: String, enum: ["rascunho", "ativa", "finalizada"], default: "rascunho" },
+    status: { type: String, enum: ["rascunho", "ativa", "pausada", "finalizada"], default: "rascunho" },
   },
   { timestamps: true }
 );

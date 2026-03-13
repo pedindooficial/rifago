@@ -45,7 +45,7 @@ export async function GET(
     await connectDB();
     const doc = await Campanha.findOne({
       _id: id,
-      status: "ativa",
+      status: { $in: ["ativa", "pausada"] },
     })
       .lean();
 

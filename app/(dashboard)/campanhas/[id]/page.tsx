@@ -24,7 +24,7 @@ import {
   Copy,
 } from "lucide-react";
 import Link from "next/link";
-import { obterCampanha, deletarCampanha, publicarCampanha, Campanha } from "@/lib/api";
+import { obterCampanha, deletarCampanha, publicarCampanha, atualizarCampanha, Campanha } from "@/lib/api";
 import { formatarMoeda } from "@/lib/taxas";
 
 export default function GerenciarCampanha() {
@@ -39,18 +39,27 @@ export default function GerenciarCampanha() {
   const [shareMenuAberto, setShareMenuAberto] = useState(false);
   const [copiadoTipo, setCopiadoTipo] = useState<"link" | "texto" | null>(null);
   const shareMenuRef = useRef<HTMLDivElement>(null);
+  const [statusMenuAberto, setStatusMenuAberto] = useState(false);
+  const statusMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function handleClickFora(e: MouseEvent) {
       if (shareMenuRef.current && !shareMenuRef.current.contains(e.target as Node)) {
         setShareMenuAberto(false);
       }
+      if (statusMenuRef.current && !statusMenuRef.current.contains(e.target as Node)) {
+        setStatusMenuAberto(false);
+      }
     }
     if (shareMenuAberto) {
       document.addEventListener("click", handleClickFora);
       return () => document.removeEventListener("click", handleClickFora);
     }
-  }, [shareMenuAberto]);
+    if (statusMenuAberto) {
+      document.addEventListener("click", handleClickFora);
+      return () => document.removeEventListener("click", handleClickFora);
+    }
+  }, [shareMenuAberto, statusMenuAberto]);
 
   useEffect(() => {
     async function carregarCampanha() {
@@ -200,9 +209,31 @@ export default function GerenciarCampanha() {
   const statusLabel =
     campanha.status === "ativa"
       ? "Ativa"
-      : campanha.status === "finalizada"
-        ? "Finalizada"
-        : "Rascunho";
+      : campanha.status === "pausada"
+        ? "Pausada"
+        : campanha.status === "finalizada"
+          ? "Finalizada"
+          : "Rascunho";
+
+  const podePausar = campanha.status === "ativa";
+  const podeRetomar = campanha.status === "pausada";
+
+  const handleAlterarStatus = async (novoStatus: "ativa" | "pausada") => {
+    if (!campanha) return;
+    const mensagemConfirm =
+      novoStatus === "pausada"
+        ? "Pausar campanha? Participantes não poderão comprar enquanto estiver pausada."
+        : "Retomar campanha como ATIVA e permitir novas compras?";
+    if (!confirm(mensagemConfirm)) return;
+    try {
+      const atualizada = await atualizarCampanha(campanha.id, { status: novoStatus });
+      setCampanha(atualizada);
+      setStatusMenuAberto(false);
+    } catch (error) {
+      console.error("Erro ao alterar status da campanha:", error);
+      alert("Não foi possível alterar o status. Tente novamente.");
+    }
+  };
 
   const base = `/campanhas/${campanha.id}`;
   const acoesCampanha = [
@@ -390,27 +421,60 @@ export default function GerenciarCampanha() {
                     </button>
                   </p>
                 </div>
-                <div
-                  className={`flex items-center gap-1 rounded-lg border px-3 py-2 ${
-                    campanha.status === "ativa"
-                      ? "border-green-200 bg-green-50"
-                      : campanha.status === "finalizada"
-                        ? "border-gray-200 bg-gray-50"
-                        : "border-amber-200 bg-amber-50"
-                  }`}
-                >
-                  <span
-                    className={`text-sm font-medium ${
+                <div className="relative" ref={statusMenuRef}>
+                  <button
+                    type="button"
+                    onClick={() => setStatusMenuAberto((v) => !v)}
+                    className={`flex items-center gap-1 rounded-lg border px-3 py-2 ${
                       campanha.status === "ativa"
-                        ? "text-green-700"
-                        : campanha.status === "finalizada"
-                          ? "text-gray-700"
-                          : "text-amber-800"
+                        ? "border-green-200 bg-green-50"
+                        : campanha.status === "pausada"
+                          ? "border-yellow-200 bg-yellow-50"
+                          : campanha.status === "finalizada"
+                            ? "border-gray-200 bg-gray-50"
+                            : "border-amber-200 bg-amber-50"
                     }`}
                   >
-                    {statusLabel}
-                  </span>
-                  <ChevronDown className="w-4 h-4 text-gray-500" aria-hidden />
+                    <span
+                      className={`text-sm font-medium ${
+                        campanha.status === "ativa"
+                          ? "text-green-700"
+                          : campanha.status === "pausada"
+                            ? "text-yellow-800"
+                            : campanha.status === "finalizada"
+                              ? "text-gray-700"
+                              : "text-amber-800"
+                      }`}
+                    >
+                      {statusLabel}
+                    </span>
+                    <ChevronDown className="w-4 h-4 text-gray-500" aria-hidden />
+                  </button>
+                  {statusMenuAberto && (
+                    <div className="absolute right-0 mt-1 w-52 rounded-xl border border-gray-200 bg-white shadow-lg z-40">
+                      <p className="px-3 py-2 text-xs font-medium text-gray-500 uppercase tracking-wide">
+                        Status da campanha
+                      </p>
+                      {podePausar && (
+                        <button
+                          type="button"
+                          onClick={() => handleAlterarStatus("pausada")}
+                          className="w-full flex items-center justify-between px-3 py-2.5 text-sm hover:bg-gray-50 text-gray-700"
+                        >
+                          <span>Pausar campanha</span>
+                        </button>
+                      )}
+                      {podeRetomar && (
+                        <button
+                          type="button"
+                          onClick={() => handleAlterarStatus("ativa")}
+                          className="w-full flex items-center justify-between px-3 py-2.5 text-sm hover:bg-gray-50 text-gray-700"
+                        >
+                          <span>Retomar como ativa</span>
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
 

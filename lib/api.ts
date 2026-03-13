@@ -43,7 +43,7 @@ export interface Campanha {
   premios?: string;
   /** Descrição da promoção (ex.: desconto, bônus) */
   promocao?: string;
-  status: "rascunho" | "ativa" | "finalizada";
+  status: "rascunho" | "ativa" | "pausada" | "finalizada";
   createdAt: string;
   /** Títulos já vendidos (compras pagas ou simuladas). Preenchido pela API ao obter campanha. */
   titulosVendidos?: number;

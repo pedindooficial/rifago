@@ -105,6 +105,11 @@ export default function VisualizarCampanha() {
                   Em breve
                 </span>
               )}
+              {campanha.status === "pausada" && (
+                <span className="inline-block mt-2 px-3 py-1 rounded-full text-xs font-medium bg-amber-500/90 text-white">
+                  Pausada
+                </span>
+              )}
               {campanha.status === "finalizada" && (
                 <span className="inline-block mt-2 px-3 py-1 rounded-full text-xs font-medium bg-gray-500/90 text-white">
                   Encerrada
@@ -114,7 +119,7 @@ export default function VisualizarCampanha() {
           </div>
 
           <div className="p-4 sm:p-6 lg:p-8 space-y-6">
-            {/* Progresso (se ativa e visível) */}
+            {/* Progresso (se ativa/pausada e visível) */}
             {mostrarProgresso && (
               <div className="p-4 rounded-xl bg-gray-50 border border-gray-200">
                 <p className="text-sm font-medium text-gray-700 mb-2">Em andamento</p>

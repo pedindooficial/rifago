@@ -138,16 +138,26 @@ export default function RifaPublicaPage() {
   const valorCota = campanha?.valorPorTitulo ?? 0;
   const totalComprar = valorTotalComPromocao(promocoes, quantidade, valorCota);
 
-  const mostrarProgresso = campanha?.status === "ativa";
+  const isAtiva = campanha?.status === "ativa";
+  const isPausada = campanha?.status === "pausada";
+  const mostrarProgresso = isAtiva || isPausada;
   const mostrarDetalhesProgresso = campanha?.progressoVisivel !== false;
 
   const handleParticipar = () => {
+    if (!campanha || campanha.status !== "ativa") {
+      alert("Esta campanha está pausada ou encerrada. No momento não é possível comprar.");
+      return;
+    }
     setPasso(2);
   };
 
   const handleComprar = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!campanha) return;
+    if (campanha.status !== "ativa") {
+      alert("Esta campanha está pausada ou encerrada. No momento não é possível comprar.");
+      return;
+    }
 
     if (!nome.trim() || !cpf.trim() || !email.trim()) {
       alert("Preencha nome, CPF e e-mail para gerar o PIX.");
@@ -199,6 +209,10 @@ export default function RifaPublicaPage() {
 
   const handleSimularPagamento = async () => {
     if (!campanha) return;
+    if (campanha.status !== "ativa") {
+      alert("Esta campanha está pausada ou encerrada. No momento não é possível comprar.");
+      return;
+    }
     if (!nome.trim() || !cpf.trim() || !email.trim()) {
       alert("Preencha nome, CPF e e-mail para simular o pagamento.");
       return;
