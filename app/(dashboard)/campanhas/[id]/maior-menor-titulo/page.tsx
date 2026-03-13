@@ -4,10 +4,22 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ArrowLeft, ArrowUpDown, Loader2, ArrowDown, ArrowUp, Ticket } from "lucide-react";
+import { formatarMoeda } from "@/lib/taxas";
+
+type StatusCompra = "pendente" | "paga" | "simulada" | "cancelada";
+
+type TituloResumo = {
+  numero: string | null;
+  compradorNome: string | null;
+  quantidade: number | null;
+  valorTotal: number | null;
+  status: StatusCompra | null;
+  createdAt: string | null;
+};
 
 type MaiorMenorData = {
-  menorTitulo: string | null;
-  maiorTitulo: string | null;
+  menorTitulo: TituloResumo | null;
+  maiorTitulo: TituloResumo | null;
   quantidadeTitulosVendidos: number;
   quantidadeTitulosCampanha: number;
 };
@@ -18,6 +30,8 @@ export default function MaiorMenorTituloPage() {
   const [data, setData] = useState<MaiorMenorData | null>(null);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
+  const [mostrarMenor, setMostrarMenor] = useState(true);
+  const [mostrarMaior, setMostrarMaior] = useState(true);
 
   useEffect(() => {
     async function carregar() {
@@ -76,27 +90,96 @@ export default function MaiorMenorTituloPage() {
           </div>
         ) : data && (data.menorTitulo != null || data.maiorTitulo != null) ? (
           <div className="p-6 sm:p-8">
+            <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <p className="text-sm font-medium text-gray-700">Busca por:</p>
+                <p className="text-xs text-gray-500">
+                  Escolha se quer ver menor, maior título ou ambos. Funciona bem em telas pequenas.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                <label className="inline-flex items-center gap-2 text-sm text-gray-700">
+                  <input
+                    type="checkbox"
+                    className="rounded border-gray-300 text-primary focus:ring-primary"
+                    checked={mostrarMenor}
+                    onChange={(e) => setMostrarMenor(e.target.checked)}
+                  />
+                  <span>Menor título</span>
+                </label>
+                <label className="inline-flex items-center gap-2 text-sm text-gray-700">
+                  <input
+                    type="checkbox"
+                    className="rounded border-gray-300 text-primary focus:ring-primary"
+                    checked={mostrarMaior}
+                    onChange={(e) => setMostrarMaior(e.target.checked)}
+                  />
+                  <span>Maior título</span>
+                </label>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <div className="rounded-xl border-2 border-gray-200 bg-gray-50/50 p-6 text-center">
-                <div className="flex items-center justify-center gap-2 text-gray-500 mb-2">
-                  <ArrowDown className="w-5 h-5" />
-                  <span className="text-sm font-semibold uppercase tracking-wide">Menor título</span>
+              {mostrarMenor && data.menorTitulo && (
+                <div className="rounded-xl border-2 border-gray-200 bg-gray-50/50 p-6 text-center">
+                  <div className="flex items-center justify-center gap-2 text-gray-500 mb-2">
+                    <ArrowDown className="w-5 h-5" />
+                    <span className="text-sm font-semibold uppercase tracking-wide">Menor título</span>
+                  </div>
+                  <p className="text-3xl sm:text-4xl font-bold text-gray-900 font-mono tracking-tight">
+                    {data.menorTitulo.numero ?? "—"}
+                  </p>
+                  <div className="mt-3 space-y-1 text-xs text-gray-600 text-left sm:text-center">
+                    {data.menorTitulo.compradorNome && (
+                      <p className="font-medium text-gray-800">
+                        Compra {data.menorTitulo.status === "paga" ? "aprovada" : "reservada"} ·{" "}
+                        {data.menorTitulo.compradorNome}
+                      </p>
+                    )}
+                    {data.menorTitulo.quantidade != null && data.menorTitulo.valorTotal != null && (
+                      <p>
+                        {data.menorTitulo.quantidade} título(s) · R${" "}
+                        {formatarMoeda(data.menorTitulo.valorTotal)}
+                      </p>
+                    )}
+                    {data.menorTitulo.createdAt && (
+                      <p className="text-[11px] text-gray-500">
+                        {new Date(data.menorTitulo.createdAt).toLocaleString("pt-BR")}
+                      </p>
+                    )}
+                  </div>
                 </div>
-                <p className="text-3xl sm:text-4xl font-bold text-gray-900 font-mono tracking-tight">
-                  {data.menorTitulo ?? "—"}
-                </p>
-                <p className="text-xs text-gray-500 mt-2">menor cota vendida ou reservada</p>
-              </div>
-              <div className="rounded-xl border-2 border-gray-200 bg-gray-50/50 p-6 text-center">
-                <div className="flex items-center justify-center gap-2 text-gray-500 mb-2">
-                  <ArrowUp className="w-5 h-5" />
-                  <span className="text-sm font-semibold uppercase tracking-wide">Maior título</span>
+              )}
+              {mostrarMaior && data.maiorTitulo && (
+                <div className="rounded-xl border-2 border-gray-200 bg-gray-50/50 p-6 text-center">
+                  <div className="flex items-center justify-center gap-2 text-gray-500 mb-2">
+                    <ArrowUp className="w-5 h-5" />
+                    <span className="text-sm font-semibold uppercase tracking-wide">Maior título</span>
+                  </div>
+                  <p className="text-3xl sm:text-4xl font-bold text-gray-900 font-mono tracking-tight">
+                    {data.maiorTitulo.numero ?? "—"}
+                  </p>
+                  <div className="mt-3 space-y-1 text-xs text-gray-600 text-left sm:text-center">
+                    {data.maiorTitulo.compradorNome && (
+                      <p className="font-medium text-gray-800">
+                        Compra {data.maiorTitulo.status === "paga" ? "aprovada" : "reservada"} ·{" "}
+                        {data.maiorTitulo.compradorNome}
+                      </p>
+                    )}
+                    {data.maiorTitulo.quantidade != null && data.maiorTitulo.valorTotal != null && (
+                      <p>
+                        {data.maiorTitulo.quantidade} título(s) · R${" "}
+                        {formatarMoeda(data.maiorTitulo.valorTotal)}
+                      </p>
+                    )}
+                    {data.maiorTitulo.createdAt && (
+                      <p className="text-[11px] text-gray-500">
+                        {new Date(data.maiorTitulo.createdAt).toLocaleString("pt-BR")}
+                      </p>
+                    )}
+                  </div>
                 </div>
-                <p className="text-3xl sm:text-4xl font-bold text-gray-900 font-mono tracking-tight">
-                  {data.maiorTitulo ?? "—"}
-                </p>
-                <p className="text-xs text-gray-500 mt-2">maior cota vendida ou reservada</p>
-              </div>
+              )}
             </div>
             <div className="mt-6 pt-6 border-t border-gray-200 flex flex-wrap items-center gap-4 justify-center">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/10 text-primary font-medium">
