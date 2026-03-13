@@ -32,26 +32,45 @@ export default function MaiorMenorTituloPage() {
   const [erro, setErro] = useState<string | null>(null);
   const [mostrarMenor, setMostrarMenor] = useState(true);
   const [mostrarMaior, setMostrarMaior] = useState(true);
+  const [dataInicio, setDataInicio] = useState<string>("");
+  const [dataFim, setDataFim] = useState<string>("");
+  const [carregandoBusca, setCarregandoBusca] = useState(false);
+  const [expandido, setExpandido] = useState<"menor" | "maior" | null>(null);
+
+  async function buscar(e?: React.FormEvent) {
+    if (e) e.preventDefault();
+    setLoading(true);
+    setCarregandoBusca(true);
+    setErro(null);
+    try {
+      const params = new URLSearchParams();
+      if (dataInicio) params.set("dataInicio", dataInicio);
+      if (dataFim) params.set("dataFim", dataFim);
+      const qs = params.toString();
+      const url = qs
+        ? `/api/campanhas/${id}/maior-menor-titulo?${qs}`
+        : `/api/campanhas/${id}/maior-menor-titulo`;
+      const res = await fetch(url);
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error((body as { error?: string }).error ?? "Erro ao carregar dados");
+      }
+      const json = (await res.json()) as MaiorMenorData;
+      setData(json);
+      setExpandido(null);
+    } catch (e) {
+      setErro(e instanceof Error ? e.message : "Erro ao carregar dados");
+      setData(null);
+    } finally {
+      setLoading(false);
+      setCarregandoBusca(false);
+    }
+  }
 
   useEffect(() => {
-    async function carregar() {
-      setLoading(true);
-      setErro(null);
-      try {
-        const res = await fetch(`/api/campanhas/${id}/maior-menor-titulo`);
-        if (!res.ok) {
-          const body = await res.json().catch(() => ({}));
-          throw new Error((body as { error?: string }).error ?? "Erro ao carregar dados");
-        }
-        const json = (await res.json()) as MaiorMenorData;
-        setData(json);
-      } catch (e) {
-        setErro(e instanceof Error ? e.message : "Erro ao carregar dados");
-      } finally {
-        setLoading(false);
-      }
-    }
-    carregar();
+    // carga inicial sem filtro de data
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    buscar();
   }, [id]);
 
   return (
@@ -90,38 +109,94 @@ export default function MaiorMenorTituloPage() {
           </div>
         ) : data && (data.menorTitulo != null || data.maiorTitulo != null) ? (
           <div className="p-6 sm:p-8">
-            <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div>
-                <p className="text-sm font-medium text-gray-700">Busca por:</p>
-                <p className="text-xs text-gray-500">
-                  Escolha se quer ver menor, maior título ou ambos. Funciona bem em telas pequenas.
-                </p>
+            <form
+              onSubmit={buscar}
+              className="mb-6 space-y-4 border-b border-gray-100 pb-4"
+            >
+              <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-gray-700">Filtrar por período</p>
+                  <p className="text-xs text-gray-500">
+                    Escolha uma data inicial e final para considerar apenas compras nesse intervalo.
+                  </p>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                  <div className="flex-1">
+                    <label className="block text-xs font-medium text-gray-600 mb-1">
+                      Data inicial
+                    </label>
+                    <input
+                      type="date"
+                      value={dataInicio}
+                      onChange={(e) => setDataInicio(e.target.value)}
+                      className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <label className="block text-xs font-medium text-gray-600 mb-1">
+                      Data final
+                    </label>
+                    <input
+                      type="date"
+                      value={dataFim}
+                      onChange={(e) => setDataFim(e.target.value)}
+                      className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
+                    />
+                  </div>
+                </div>
               </div>
-              <div className="flex flex-wrap gap-3">
-                <label className="inline-flex items-center gap-2 text-sm text-gray-700">
-                  <input
-                    type="checkbox"
-                    className="rounded border-gray-300 text-primary focus:ring-primary"
-                    checked={mostrarMenor}
-                    onChange={(e) => setMostrarMenor(e.target.checked)}
-                  />
-                  <span>Menor título</span>
-                </label>
-                <label className="inline-flex items-center gap-2 text-sm text-gray-700">
-                  <input
-                    type="checkbox"
-                    className="rounded border-gray-300 text-primary focus:ring-primary"
-                    checked={mostrarMaior}
-                    onChange={(e) => setMostrarMaior(e.target.checked)}
-                  />
-                  <span>Maior título</span>
-                </label>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                  <p className="text-sm font-medium text-gray-700">Busca por:</p>
+                  <p className="text-xs text-gray-500">
+                    Escolha se quer ver menor, maior título ou ambos.
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  <label className="inline-flex items-center gap-2 text-sm text-gray-700">
+                    <input
+                      type="checkbox"
+                      className="rounded border-gray-300 text-primary focus:ring-primary"
+                      checked={mostrarMenor}
+                      onChange={(e) => setMostrarMenor(e.target.checked)}
+                    />
+                    <span>Menor título</span>
+                  </label>
+                  <label className="inline-flex items-center gap-2 text-sm text-gray-700">
+                    <input
+                      type="checkbox"
+                      className="rounded border-gray-300 text-primary focus:ring-primary"
+                      checked={mostrarMaior}
+                      onChange={(e) => setMostrarMaior(e.target.checked)}
+                    />
+                    <span>Maior título</span>
+                  </label>
+                </div>
               </div>
-            </div>
+              <div className="pt-1">
+                <button
+                  type="submit"
+                  disabled={carregandoBusca}
+                  className="w-full inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary-dark disabled:opacity-70 disabled:cursor-not-allowed transition-colors"
+                >
+                  {carregandoBusca ? "Buscando..." : "Buscar"}
+                </button>
+              </div>
+            </form>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               {mostrarMenor && data.menorTitulo && (
-                <div className="rounded-xl border-2 border-gray-200 bg-gray-50/50 p-6 text-center">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setExpandido((prev) => (prev === "menor" ? null : "menor"))
+                  }
+                  className={`rounded-xl border-2 bg-gray-50/50 p-6 text-center transition-colors ${
+                    expandido === "menor"
+                      ? "border-primary/70 bg-primary/5"
+                      : "border-gray-200 hover:border-primary/40 hover:bg-gray-50"
+                  }`}
+                >
                   <div className="flex items-center justify-center gap-2 text-gray-500 mb-2">
                     <ArrowDown className="w-5 h-5" />
                     <span className="text-sm font-semibold uppercase tracking-wide">Menor título</span>
@@ -147,11 +222,31 @@ export default function MaiorMenorTituloPage() {
                         {new Date(data.menorTitulo.createdAt).toLocaleString("pt-BR")}
                       </p>
                     )}
+                    {expandido === "menor" &&
+                      data.menorTitulo.numerosCompra &&
+                      data.menorTitulo.numerosCompra.length > 0 && (
+                        <p className="pt-2 text-[11px] text-gray-600">
+                          Números dessa compra:{" "}
+                          <span className="font-mono">
+                            {data.menorTitulo.numerosCompra.join(", ")}
+                          </span>
+                        </p>
+                      )}
                   </div>
-                </div>
+                </button>
               )}
               {mostrarMaior && data.maiorTitulo && (
-                <div className="rounded-xl border-2 border-gray-200 bg-gray-50/50 p-6 text-center">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setExpandido((prev) => (prev === "maior" ? null : "maior"))
+                  }
+                  className={`rounded-xl border-2 bg-gray-50/50 p-6 text-center transition-colors ${
+                    expandido === "maior"
+                      ? "border-primary/70 bg-primary/5"
+                      : "border-gray-200 hover:border-primary/40 hover:bg-gray-50"
+                  }`}
+                >
                   <div className="flex items-center justify-center gap-2 text-gray-500 mb-2">
                     <ArrowUp className="w-5 h-5" />
                     <span className="text-sm font-semibold uppercase tracking-wide">Maior título</span>
@@ -177,8 +272,18 @@ export default function MaiorMenorTituloPage() {
                         {new Date(data.maiorTitulo.createdAt).toLocaleString("pt-BR")}
                       </p>
                     )}
+                    {expandido === "maior" &&
+                      data.maiorTitulo.numerosCompra &&
+                      data.maiorTitulo.numerosCompra.length > 0 && (
+                        <p className="pt-2 text-[11px] text-gray-600">
+                          Números dessa compra:{" "}
+                          <span className="font-mono">
+                            {data.maiorTitulo.numerosCompra.join(", ")}
+                          </span>
+                        </p>
+                      )}
                   </div>
-                </div>
+                </button>
               )}
             </div>
             <div className="mt-6 pt-6 border-t border-gray-200 flex flex-wrap items-center gap-4 justify-center">

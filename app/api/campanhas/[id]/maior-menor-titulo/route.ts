@@ -5,6 +5,7 @@ import { connectDB } from "@/lib/mongodb";
 import Campanha from "@/lib/models/Campanha";
 import Compra from "@/lib/models/Compra";
 import type { StatusCompra } from "@/lib/models/Compra";
+import { normalizarNumerosCotas } from "@/lib/formatadores";
 
 /** GET: retorna o menor e o maior título/cota vendido ou reservado (paga, simulada, pendente). Apenas dono da campanha. */
 export async function GET(
@@ -40,10 +41,27 @@ export async function GET(
       );
     }
 
-    const compras = await Compra.find({
+    const { searchParams } = new URL(request.url);
+    const dataInicioStr = searchParams.get("dataInicio");
+    const dataFimStr = searchParams.get("dataFim");
+
+    const filtroCompras: Record<string, unknown> = {
       campanhaId: new mongoose.Types.ObjectId(campanhaId),
-      status: { $in: ["paga", "simulada", "pendente"] },
-    })
+      status: { $in: ["paga", "simulada", "pendente"] as StatusCompra[] },
+    };
+
+    if (dataInicioStr || dataFimStr) {
+      const createdAt: Record<string, Date> = {};
+      if (dataInicioStr) {
+        createdAt.$gte = new Date(`${dataInicioStr}T00:00:00.000Z`);
+      }
+      if (dataFimStr) {
+        createdAt.$lte = new Date(`${dataFimStr}T23:59:59.999Z`);
+      }
+      filtroCompras.createdAt = createdAt;
+    }
+
+    const compras = await Compra.find(filtroCompras)
       .select("numeros comprador.nome quantidade valorTotal status createdAt")
       .lean();
 
@@ -65,6 +83,7 @@ export async function GET(
       valorTotal: number | null;
       status: StatusCompra | null;
       createdAt: string | null;
+      numerosCompra: string[];
     };
 
     let menor: { valor: number; info: InfoTitulo } | null = null;
@@ -73,7 +92,8 @@ export async function GET(
 
     for (const compraDoc of compras as unknown as CompraLean[]) {
       const nums = Array.isArray(compraDoc.numeros) ? compraDoc.numeros : [];
-      for (const n of nums) {
+      const numerosNormalizados = normalizarNumerosCotas(nums);
+      for (const n of numerosNormalizados) {
         const s = String(n).trim();
         if (!s) continue;
         const v = parseInt(s, 10);
@@ -87,6 +107,7 @@ export async function GET(
           valorTotal: typeof compraDoc.valorTotal === "number" ? compraDoc.valorTotal : null,
           status: compraDoc.status ?? null,
           createdAt: compraDoc.createdAt ? compraDoc.createdAt.toISOString() : null,
+          numerosCompra: numerosNormalizados,
         };
 
         if (!menor || v < menor.valor) {
